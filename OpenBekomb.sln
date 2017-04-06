@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenBekomb", "OpenBekomb\OpenBekomb.csproj", "{413F8F2C-94C7-42CC-BCC7-CB47EDB30425}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleBot", "SimpleBot\SimpleBot.csproj", "{7BB22C33-1EAE-4161-84E5-174520545499}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{413F8F2C-94C7-42CC-BCC7-CB47EDB30425}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{413F8F2C-94C7-42CC-BCC7-CB47EDB30425}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{413F8F2C-94C7-42CC-BCC7-CB47EDB30425}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{413F8F2C-94C7-42CC-BCC7-CB47EDB30425}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7BB22C33-1EAE-4161-84E5-174520545499}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7BB22C33-1EAE-4161-84E5-174520545499}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7BB22C33-1EAE-4161-84E5-174520545499}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7BB22C33-1EAE-4161-84E5-174520545499}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
