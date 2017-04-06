@@ -11,7 +11,10 @@ namespace OpenBekomb
 
         public abstract string Message { get; }
 
-        internal abstract void Update(float _deltaTime);
+        internal virtual void Update(float _deltaTime)
+        {
+
+        }
 
         public AModule(ABot _bot)
         {
