@@ -65,6 +65,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Speech" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
@@ -72,9 +73,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ABot.cs" />
+    <Compile Include="BotConfig.cs" />
+    <Compile Include="Channel.cs" />
+    <Compile Include="CICommands\CIJoinCommand.cs" />
+    <Compile Include="CICommands\CISendCommand.cs" />
+    <Compile Include="Commands\ABotCommand.cs" />
+    <Compile Include="Commands\PrivMsgCommand.cs" />
     <Compile Include="Modules\AModule.cs" />
-    <Compile Include="Modules\PingModule.cs" />
+    <Compile Include="Commands\PingCommand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="User.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -8,14 +8,6 @@ namespace SimpleBot
 {
     public class SimpleBot : ABot
     {
-        public override string Name
-        {
-            get
-            {
-                return "SimpleBot";
-            }
-        }
-
         public SimpleBot(string _host, int _port)
             :base (_host, _port)
         {

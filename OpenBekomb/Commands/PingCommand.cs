@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace OpenBekomb
+namespace OpenBekomb.Commands
 {
-    public class PingModule : AModule
+    public class PingCommand : ABotCommand
     {
-        private float m_timer;
+        //private float m_timer;
 
-        public override string Message
+        public override string Name
         {
             get
             {
@@ -17,7 +17,7 @@ namespace OpenBekomb
             }
         }
 
-        public PingModule(ABot _bot) 
+        public PingCommand(ABot _bot) 
             : base(_bot)
         {
         }
@@ -33,9 +33,9 @@ namespace OpenBekomb
         //    }
         //}
 
-        public override void Answer(string _message)
+        public override void Answer(string _messageHead, string _messageBody)
         {
-            Owner.SendRawMessage($"PONG :{_message.Split(':')[1]}");
+            Owner.SendRawMessage($"PONG :{_messageBody}");
         }
     }
 }
