@@ -26,14 +26,13 @@ namespace OpenBekomb
         public const long MAX_MILLISEC_PER_FRAME = (long)(1 / TARGET_FPS * 1000);
 
         private bool m_isRunning;
+
         private Socket m_socket;
 
         private Thread m_MessageThread;
         private Thread m_ConsoleInputThread;
         private Thread m_CIThread;
 
-        //private List<AModule> m_modules = new List<AModule>();
-        //private List<ABotCommand> m_commands = new List<ABotCommand>();
         protected List<Channel> m_channels = new List<Channel>();
 
 
@@ -50,8 +49,22 @@ namespace OpenBekomb
 
             m_isRunning = true;
 
+            // Socket
             m_socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             m_socket.Connect(_host, _port);
+
+            //Commands
+            AddCommand(new PingCommand(this));
+            AddCommand(new PrivMsgCommand(this));
+            AddCommand(new PongCommand(this));
+            AddCommand(new KickCommand(this));
+
+            //Modules
+            AddModule(new PingModule(this));
+            AddModule(new CIModule(this));
+
+
+            //Threads
             m_MessageThread = new Thread(ProcessInput);
             m_MessageThread.Start();
             m_ConsoleInputThread = new Thread(ConsoleInput);
@@ -59,12 +72,7 @@ namespace OpenBekomb
             m_CIThread = new Thread(CILoop);
             m_CIThread.Start();
 
-            AddCommand(new PingCommand(this));
-            AddCommand(new PrivMsgCommand(this));
-            AddCommand(new PongCommand(this));
-
-            AddModule(new PingModule(this));
-            AddModule(new CIModule(this));
+            
         }
 
         public void Run(BotConfig _config = null)
@@ -290,6 +298,8 @@ namespace OpenBekomb
             ci.AddProgram<CommandInterpreter.Calculator.Calc>();
             ci.AddProgram<CISendCommand>();
             ci.AddProgram<CIJoinCommand>();
+            ci.AddProgram<CIPartCommand>();
+            ci.AddProgram<CIKickCommand>();
             ci.Initialize(L.Log, L.LogE);
 
             string currentCMD;
@@ -316,6 +326,11 @@ namespace OpenBekomb
                 || _message.StartsWith(m_Config.m_Symbol);
         }
 
+        internal Channel GetChannel(string _channelName)
+        {
+            return m_channels.FirstOrDefault(o => o.Name == _channelName);
+        }
+
         public void Join(Channel _channel)
         {
             Join(_channel.Name);
@@ -324,9 +339,46 @@ namespace OpenBekomb
         public void Join(string _channelName)
         {
             Channel c = new Channel(_channelName);
-            SendRawMessage($"JOIN {_channelName}");
 
-            m_channels.Add(c);
+            if (!m_channels.Any(o => o.Name == _channelName))
+            {
+                SendRawMessage($"JOIN {_channelName}");
+
+                m_channels.Add(c);
+            }
+        }
+
+        public void Part(Channel _channel, string _message)
+        {
+            Part(_channel.Name, _message);
+        }
+
+        public void Part(string _channelName, string _message)
+        {
+            Channel c = m_channels.FirstOrDefault(o => o.Name == _channelName);
+            if (c != null)
+            {
+                string s = $"PART {_channelName} :{_message ?? ""}";
+                SendRawMessage(s);
+
+                Parted(c);
+            }
+        }
+
+        public void Parted(Channel _channel)
+        {
+            m_channels.Remove(_channel);
+        }
+
+        public void Kick(Channel _channel, User _user, string _reason)
+        {
+            Kick(_channel.Name, _user.Name, _reason);
+        }
+
+        public void Kick(string _channelName, string _userName, string _reason)
+        {
+            string s = $"KICK {_channelName} {_userName} :{_reason ?? _userName}";
+            SendRawMessage(s);
         }
 
         public void SendMessage(User _user, string _message)
@@ -341,7 +393,7 @@ namespace OpenBekomb
 
         public void SendRawMessage(string _text)
         {
-            m_socket.Send(Encoding.Default.GetBytes(_text + "\r\n"));
+            m_socket.Send(Encoding.UTF8.GetBytes(_text + "\r\n"));
         }
 
         public void ShutDown()
