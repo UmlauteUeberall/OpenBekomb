@@ -22,17 +22,6 @@ namespace OpenBekomb.Commands
         {
         }
 
-        //internal override void Update(float _deltaTime)
-        //{
-        //    m_timer += _deltaTime;
-        //    if (m_timer > 10)
-        //    {
-        //        //Console.WriteLine(m_timer);
-        //        //Owner.SendRawMessage($"PING :{Owner.Name}");
-        //        m_timer = 0;
-        //    }
-        //}
-
         public override void Answer(string _messageHead, string _messageBody)
         {
             Owner.SendRawMessage($"PONG :{_messageBody}");

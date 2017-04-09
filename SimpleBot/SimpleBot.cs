@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using OpenBekomb;
+﻿using OpenBekomb;
+using OpenBekomb.Modules;
+using SimpleBot.Modules;
 
 namespace SimpleBot
 {
@@ -11,7 +9,8 @@ namespace SimpleBot
         public SimpleBot(string _host, int _port)
             :base (_host, _port)
         {
-
+            AddModule(new TTSModule(this));
+            AddModule(new CronModule(this));
         }
     }
 }

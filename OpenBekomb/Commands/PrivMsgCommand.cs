@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
-using System.Speech.Synthesis;
 
 namespace OpenBekomb.Commands
 {
@@ -21,8 +18,6 @@ namespace OpenBekomb.Commands
             }
         }
 
-        private Random m_rand = new Random();
-
         public override void Answer(string _messageHead, string _messageBody)
         {
             string[] headParts = _messageHead.Split(new[] { "PRIVMSG" }, StringSplitOptions.RemoveEmptyEntries);
@@ -37,27 +32,14 @@ namespace OpenBekomb.Commands
                 return;
             }
 
+            Channel c = target.StartsWith("#") ? new Channel(target) : null;
+            User s = new User(sender);
+            User t = c == null ? new User(target) : null;
+
+            Owner.ProcessModulesAnswers(c, s, t, _messageBody);
 
 
-
-            SpeechSynthesizer ss = new SpeechSynthesizer();
-            var voices = ss.GetInstalledVoices();
-
-            int i = 0;
-            ss.SelectVoice(voices[m_rand.Next(voices.Count - 1)].VoiceInfo.Name);
-            ss.Rate = -5;
-
-            try
-            {
-                //ss.Speak("Alarm");
-                // ss.SetOutputToWaveFile($"file{i++}.wav");
-                ss.Speak(_messageBody);
-
-            }
-            catch (ArgumentNullException _ex)
-            {
-
-            }
+            
             
 
 

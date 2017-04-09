@@ -9,9 +9,14 @@ namespace OpenBekomb.Modules
     {
         public ABot Owner { get; private set; }
 
-        
+        public abstract string Name { get; }
 
-        internal virtual void Update(float _deltaTime)
+        public virtual void Update(float _deltaTime)
+        {
+
+        }
+
+        public virtual void Answer(Channel _chan, User _sender, User _target, string _message)
         {
 
         }

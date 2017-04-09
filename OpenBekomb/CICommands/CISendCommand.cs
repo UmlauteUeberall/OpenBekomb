@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using CommandInterpreter;
+using plib.Util;
 
 namespace OpenBekomb.CICommands
 {
@@ -27,7 +28,9 @@ namespace OpenBekomb.CICommands
                 return;
             }
 
-            ABot.Bot.SendMessage(_arguments[0], string.Join(",", _arguments.Skip(1).ToArray()));
+            string message = string.Join(",", _arguments.Skip(1).ToArray());
+            message.Split(new[] { "\r\n" }, System.StringSplitOptions.None).
+                ForEach(o => ABot.Bot.SendMessage(_arguments[0], o));
         }
     }
 }

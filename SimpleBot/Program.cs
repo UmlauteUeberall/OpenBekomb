@@ -20,7 +20,8 @@ namespace SimpleBot
                                             {
                                                 "#durp",
                                                 "#hurp"
-                                            }
+                                            },
+                                    m_Symbol = "ü"
                                     });
 
             /*

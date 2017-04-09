@@ -30,10 +30,19 @@ namespace OpenBekomb
 
         private Thread m_MessageThread;
         private Thread m_ConsoleInputThread;
+        private Thread m_CIThread;
 
-        private List<AModule> m_modules = new List<AModule>();
-        private List<ABotCommand> m_commands = new List<ABotCommand>();
-        private List<Channel> m_channels = new List<Channel>();
+        //private List<AModule> m_modules = new List<AModule>();
+        //private List<ABotCommand> m_commands = new List<ABotCommand>();
+        protected List<Channel> m_channels = new List<Channel>();
+
+
+        private Dictionary<Type, AModule> m_modules = new Dictionary<Type, AModule>();
+        private Dictionary<Type, ABotCommand> m_commands = new Dictionary<Type, ABotCommand>();
+
+        private Queue<string> m_pendingCICommands = new Queue<string>();
+        private object m_ciCommandsLock = new object();
+
 
         public ABot(string _host, int _port)
         {
@@ -47,10 +56,15 @@ namespace OpenBekomb
             m_MessageThread.Start();
             m_ConsoleInputThread = new Thread(ConsoleInput);
             m_ConsoleInputThread.Start();
+            m_CIThread = new Thread(CILoop);
+            m_CIThread.Start();
 
-            m_commands.Add(new PingCommand(this));
-            m_commands.Add(new PrivMsgCommand(this));
-            
+            AddCommand(new PingCommand(this));
+            AddCommand(new PrivMsgCommand(this));
+            AddCommand(new PongCommand(this));
+
+            AddModule(new PingModule(this));
+            AddModule(new CIModule(this));
         }
 
         public void Run(BotConfig _config = null)
@@ -94,9 +108,9 @@ namespace OpenBekomb
 
         protected virtual void Update(float _deltaTime)
         {
-            foreach (AModule mod in m_modules)
+            foreach (var mod in m_modules)
             {
-                mod.Update(_deltaTime);
+                mod.Value.Update(_deltaTime);
             }
         }
 
@@ -117,7 +131,7 @@ namespace OpenBekomb
             #endregion
             string pattern = $@"^(:?[^:]*({
                 string.Join("|", 
-                            m_commands.Select(o => o.Name).ToArray())
+                            m_commands.Select(o => o.Value.Name).ToArray())
                             })[^:]*):(.*)";
 
 
@@ -126,7 +140,7 @@ namespace OpenBekomb
             
             m = Regex.Match(message.Split(new[] { "\r\n" }, 
                         StringSplitOptions.RemoveEmptyEntries)[1], pattern);
-            m_commands.FirstOrDefault(o => o is PingCommand).Answer(m.Groups[1].Value, m.Groups[3].Value);
+            Com<PingCommand>().Answer(m.Groups[1].Value, m.Groups[3].Value);
 
             // Warte auf das Ende der MOTD
             while (!Started)
@@ -158,12 +172,20 @@ namespace OpenBekomb
                     currentLine = incommingMessages.Dequeue();
                     //messageParts = currentLine.Split(' ');
                     m = Regex.Match(currentLine, pattern);
-                    mod = m_commands.FirstOrDefault(o => o.Name == m.Groups[2].Value);
+                    mod = Com(m.Groups[2].Value);
                     if (mod != null)
                     {
                         mod.Answer(m.Groups[1].Value, m.Groups[3].Value);  
                     }
                 }
+            }
+        }
+
+        public void ProcessModulesAnswers(Channel _chan, User _sender, User _target, string _message)
+        {
+            foreach (var m in m_modules)
+            {
+                m.Value.Answer(_chan, _sender, _target, _message);
             }
         }
 
@@ -174,31 +196,116 @@ namespace OpenBekomb
             string message = "";
             do
             {
-                length = m_socket.Receive(buffer);
-                if (length == 0)    // Disconnect
+                try
+                {
+                    length = m_socket.Receive(buffer);
+                    if (length == 0)    // Disconnect
+                    {
+                        throw new SocketException();
+                    }
+                    message += Encoding.UTF8.GetString(buffer);
+                    Array.Clear(buffer, 0, buffer.Length);
+                }
+                catch (SocketException _ex)
                 {
                     ShutDown();
                     return "";
                 }
-                message += Encoding.UTF8.GetString(buffer);
-                Array.Clear(buffer, 0, buffer.Length);
             } while (length == 1024);
             L.Log(message);
 
             return message;
         }
 
+        public T Mod<T>() where T: AModule
+        {
+            return (T) m_modules[typeof(T)];
+        }
+
+        public AModule Mod(string _name)
+        {
+            return m_modules.FirstOrDefault(o => o.Value.Name == _name).Value;
+        }
+
+        public T Com<T>() where T : ABotCommand
+        {
+            return (T)m_commands[typeof(T)];
+        }
+
+        public ABotCommand Com(string _name)
+        {
+            return m_commands.FirstOrDefault(o => o.Value.Name == _name).Value;
+        }
+
+        public void AddModule(AModule _mod)
+        {
+            m_modules.Add(_mod.GetType(), _mod);
+        }
+
+        public void AddCommand(ABotCommand _cmd)
+        {
+            m_commands.Add(_cmd.GetType(), _cmd);
+        }
+
+        public void RemoveModule(AModule _mod)
+        {
+            m_modules.Remove(_mod.GetType());
+        }
+
+        public void RemoveCommand(ABotCommand _cmd)
+        {
+            m_commands.Remove(_cmd.GetType());
+        }
+
+        public void AddCICommand(string _ciCode)
+        {
+            lock (m_ciCommandsLock)
+            {
+                m_pendingCICommands.Enqueue(_ciCode);
+            }
+        }
+
         private void ConsoleInput()
+        {
+            
+            while (true)
+            {
+                string s = Console.ReadLine();
+                AddCICommand(s);
+            }
+        }
+
+        private void CILoop()
         {
             CmdInterpreter ci = new CmdInterpreter();
             ci.LoadCoreUtils();
+            ci.AddProgram<CommandInterpreter.Calculator.Calc>();
             ci.AddProgram<CISendCommand>();
             ci.AddProgram<CIJoinCommand>();
-            ci.Initialize(Console.ReadLine, L.Log, L.LogE);
+            ci.Initialize(L.Log, L.LogE);
+
+            string currentCMD;
+
             while (true)
             {
-                ci.Run();
+                lock (m_ciCommandsLock)
+                {
+                    if (m_pendingCICommands.Count == 0)
+                    {
+                        Thread.Sleep(50);
+                        continue;
+                    }
+                    currentCMD = m_pendingCICommands.Dequeue();
+
+                    ci.Run(currentCMD);
+                }
             }
+        }
+
+        public bool IsAdressed(string _message)
+        {
+            return _message.StartsWith($"{m_Config.m_Name}:")
+                || _message.StartsWith(m_Config.m_Symbol);
         }
 
         public void Join(Channel _channel)
