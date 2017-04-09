@@ -29,6 +29,9 @@ namespace OpenBekomb.CICommands
             }
 
             string message = string.Join(",", _arguments.Skip(1).ToArray());
+
+            message = m_owner.CheckVariables(message);
+
             message.Split(new[] { "\r\n" }, System.StringSplitOptions.None).
                 ForEach(o => ABot.Bot.SendMessage(_arguments[0], o));
         }
