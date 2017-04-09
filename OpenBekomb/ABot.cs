@@ -219,6 +219,10 @@ namespace OpenBekomb
 
         public T Mod<T>() where T: AModule
         {
+            if (!m_modules.ContainsKey(typeof(T)))
+            {
+                return null;
+            }
             return (T) m_modules[typeof(T)];
         }
 
@@ -229,6 +233,10 @@ namespace OpenBekomb
 
         public T Com<T>() where T : ABotCommand
         {
+            if (!m_commands.ContainsKey(typeof(T)))
+            {
+                return null;
+            }
             return (T)m_commands[typeof(T)];
         }
 
