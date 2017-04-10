@@ -35,21 +35,10 @@ namespace OpenBekomb.Modules
             }
         }
 
-        public override void Answer(Channel _chan, User _sender, User _target, string _message)
-        {
-            base.Answer(_chan, _sender, _target, _message);
-
-            if (Owner.IsAdressed(_message))
-            {
-                string[] words = _message.Split(' ');
-                if (words.Length > 1 && words[1] == Name)
-                {
-                    Owner.SendRawMessage($"PING :{DateTime.Now.Ticks}");
-                    Owner.SendMessage(_chan?.Name ?? _sender.Name, 
-                        $"{_sender.Name}: {LastPingTime}ms");
-                }
-            }
-        }
+        //public override void Answer(Channel _chan, User _sender, User _target, string _message)
+        //{
+        //    
+        //}
 
 
     }

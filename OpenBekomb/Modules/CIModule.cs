@@ -25,12 +25,12 @@ namespace OpenBekomb.Modules
             base.Answer(_chan, _sender, _target, _message);
 
             string[] words = _message.Split(' ');
-            if (words.Length < 3 || words[1] != Name)
+            if (words.Length < 2 || words[0] != Owner.m_Config.m_Symbol)
             {
                 return;
             }
 
-            Owner.AddCICommand(string.Join(" ",words.Skip(2).ToArray()));
+            Owner.AddCICommand(string.Join(" ",words.Skip(1).ToArray()));
         }
     }
 }

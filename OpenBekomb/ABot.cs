@@ -300,6 +300,7 @@ namespace OpenBekomb
             ci.AddProgram<CIJoinCommand>();
             ci.AddProgram<CIPartCommand>();
             ci.AddProgram<CIKickCommand>();
+            ci.AddProgram<CIPingCommand>();
             ci.Initialize(L.Log, L.LogE);
 
             string currentCMD;
