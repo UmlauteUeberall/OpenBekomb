@@ -13,13 +13,9 @@ namespace OpenBekomb.CICommands
         {
         }
 
-        public override string ManPage
-        {
-            get
-            {
-                return "Sends a message to an irc user";
-            }
-        }
+        public override string ManPage => 
+@"Sends a message to an irc user
+Takes 2 parameters";
 
         public override void Run(string[] _arguments)
         {

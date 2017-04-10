@@ -8,13 +8,9 @@ namespace OpenBekomb.CICommands
 {
     class CIPingCommand : ACommand
     {
-        public override string ManPage
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
+        public override string ManPage =>
+@"Shows latency to the server
+takes no parameters";
 
         public override void Run(string[] _arguments)
         {

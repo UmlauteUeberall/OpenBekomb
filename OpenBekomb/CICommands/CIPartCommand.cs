@@ -13,13 +13,9 @@ namespace OpenBekomb.CICommands
         {
         }
 
-        public override string ManPage
-        {
-            get
-            {
-                return "Joins into an irc channel";
-            }
-        }
+        public override string ManPage => 
+@"Parts an irc channel
+Takes ";
 
         public override void Run(string[] _arguments)
         {

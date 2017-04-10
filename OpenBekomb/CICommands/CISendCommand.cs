@@ -11,14 +11,10 @@ namespace OpenBekomb.CICommands
         {
         }
 
-        public override string ManPage
-        {
-            get
-            {
-                return "Sends a message to an irc user";
-            }
-        }
-
+        public override string ManPage => 
+@"Sends a message to an irc user
+Takes to parameters";
+       
         public override void Run(string[] _arguments)
         {
             base.Run(_arguments);

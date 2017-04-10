@@ -10,20 +10,16 @@ namespace OpenBekomb.CICommands
         {
         }
 
-        public override string ManPage
-        {
-            get
-            {
-                return "Joins into an irc channel";
-            }
-        }
+        public override string ManPage => 
+@"Joins into an irc channel
+Needs one parameter";
 
         public override void Run(string[] _arguments)
         {
             base.Run(_arguments);
-            if (_arguments.Length < 1)
+            if (_arguments.Length != 1)
             {
-                m_owner.InvokeError("you need at least 1 parameter");
+                m_owner.InvokeError("you need at 1 parameter");
                 return;
             }
 
