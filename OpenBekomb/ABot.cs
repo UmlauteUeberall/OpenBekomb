@@ -137,10 +137,11 @@ namespace OpenBekomb
             // group 2 command name
             // group 3 body
             #endregion
-            string pattern = $@"^(:?[^:]*({
-                string.Join("|", 
-                            m_commands.Select(o => o.Value.Name).ToArray())
-                            })[^:]*):(.*)";
+            //string pattern = $@"^(:?[^:]*({
+            //    string.Join("|", 
+            //                m_commands.Select(o => o.Value.Name).ToArray())
+            //                })[^:]*):(.*)";
+            string pattern = @"^(?:[:](\S+) )?(\S+)(?: (?!:)(.+?))?(?: [:](.+))?$";
 
 
             // Erste Nachricht ist ein Ping das beantwortet werden muss
@@ -148,7 +149,7 @@ namespace OpenBekomb
             
             m = Regex.Match(message.Split(new[] { "\r\n" }, 
                         StringSplitOptions.RemoveEmptyEntries)[1], pattern);
-            Com<PingCommand>().Answer(m.Groups[1].Value, m.Groups[3].Value);
+            Com<PingCommand>().Answer(m.Groups[1].Value, m.Groups[3].Value, m.Groups[4].Value);
 
             // Warte auf das Ende der MOTD
             while (!Started)
@@ -183,7 +184,7 @@ namespace OpenBekomb
                     mod = Com(m.Groups[2].Value);
                     if (mod != null)
                     {
-                        mod.Answer(m.Groups[1].Value, m.Groups[3].Value);  
+                        mod.Answer(m.Groups[1].Value, m.Groups[3].Value, m.Groups[4].Value);  
                     }
                 }
             }
@@ -293,6 +294,11 @@ namespace OpenBekomb
 
         private void CILoop()
         {
+            while (m_Config == null)
+            {
+                Thread.Sleep(100);
+            }
+
             CmdInterpreter ci = new CmdInterpreter();
             ci.LoadCoreUtils();
             ci.AddProgram<CommandInterpreter.Calculator.Calc>();
@@ -301,6 +307,11 @@ namespace OpenBekomb
             ci.AddProgram<CIPartCommand>();
             ci.AddProgram<CIKickCommand>();
             ci.AddProgram<CIPingCommand>();
+
+            m_Config.m_CICommands?.ForEach(o => ci.AddProgram(o));
+
+            m_Config.m_BlackListedCICommands?.ForEach(o => ci.RemoveProgram(o));
+
             ci.Initialize(L.Log, L.LogE);
 
             string currentCMD;

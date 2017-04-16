@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
 using OpenBekomb;
+using SimpleBot.CICommands;
+using CommandInterpreter.Commands;
+using CommandInterpreter;
 
 namespace SimpleBot
 {
@@ -19,9 +21,12 @@ namespace SimpleBot
                                     m_StartChannels = new [] 
                                             {
                                                 "#durp",
-                                                "#hurp"
-                                            },
-                                    m_Symbol = "ü"
+                                                "#hurp",
+                                                "#/prog/bot"
+                                    },
+                                    m_Symbol = "ü",
+                                    m_CICommands = new ACommand[] { new CIDDateCommand()},
+                                    m_BlackListedCICommands = new ACommand[] { new WriteCommand(), new CommandCommand()}
                                     });
 
             /*

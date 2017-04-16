@@ -6,6 +6,7 @@ using CommandInterpreter;
 
 namespace OpenBekomb.CICommands
 {
+    [Command("ping")]
     class CIPingCommand : ACommand
     {
         public override string ManPage =>

@@ -11,7 +11,7 @@ namespace OpenBekomb.Commands
 
         public abstract string Name { get; }
 
-        public abstract void Answer(string _messageHead, string _messageBody);
+        public abstract void Answer(string _sender, string _target, string _messageBody);
 
         public ABotCommand(ABot _bot)
         {
