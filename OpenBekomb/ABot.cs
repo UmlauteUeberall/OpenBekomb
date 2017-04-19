@@ -1,17 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using plib.Util;
 using System.Text.RegularExpressions;
+using plib.Util;
+using CommandInterpreter;
 using OpenBekomb.Commands;
 using OpenBekomb.Modules;
-using CommandInterpreter;
 using OpenBekomb.CICommands;
 
 using Stopwatch = System.Diagnostics.Stopwatch;
+using Type = System.Type;
+using StringSplitOptions = System.StringSplitOptions;
 
 namespace OpenBekomb
 {
@@ -48,6 +49,8 @@ namespace OpenBekomb
             Bot = this;
 
             m_isRunning = true;
+
+            L.APP_NAME = GetType().Name;
 
             // Socket
             m_socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -100,10 +103,10 @@ namespace OpenBekomb
                 {
                     Update((sw.ElapsedMilliseconds - time) / 1000.0f);
                     time = sw.ElapsedMilliseconds;
-                    Thread.Sleep((int)(Math.Max(MAX_MILLISEC_PER_FRAME - sw.ElapsedMilliseconds + time, 0)));
+                    Thread.Sleep((int)(System.Math.Max(MAX_MILLISEC_PER_FRAME - sw.ElapsedMilliseconds + time, 0)));
                 }
             }
-            catch (Exception _ex)
+            catch (System.Exception _ex)
             {
                 L.LogW(_ex);
             }
@@ -155,7 +158,6 @@ namespace OpenBekomb
             while (!Started)
             {
                 message = ReceiveMessage();
-                message = message.Replace("\0", "");
                 message.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries).ForEach(o => incommingMessages.Enqueue(o));
                 while (incommingMessages.Count > 0)
                 {
@@ -170,8 +172,7 @@ namespace OpenBekomb
 
             while (true)
             {
-                message = ReceiveMessage();
-                message = message.Replace("\0", "");
+                message = ReceiveMessage();            
                 message.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries).
                     ForEach(o => incommingMessages.Enqueue(o));
 
@@ -213,7 +214,7 @@ namespace OpenBekomb
                         throw new SocketException();
                     }
                     message += Encoding.UTF8.GetString(buffer);
-                    Array.Clear(buffer, 0, buffer.Length);
+                    System.Array.Clear(buffer, 0, buffer.Length);
                 }
                 catch (SocketException _ex)
                 {
@@ -221,6 +222,8 @@ namespace OpenBekomb
                     return "";
                 }
             } while (length == 1024);
+            message = message.Replace("\0", "");
+            message = message.Trim();
             L.Log(message);
 
             return message;
@@ -287,7 +290,7 @@ namespace OpenBekomb
             
             while (true)
             {
-                string s = Console.ReadLine();
+                string s = System.Console.ReadLine();
                 AddCICommand(s);
             }
         }

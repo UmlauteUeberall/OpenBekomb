@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using CommandInterpreter;
+﻿using CommandInterpreter;
 using ddate;
 using OpenBekomb;
 
@@ -24,11 +20,11 @@ namespace SimpleBot.CICommands
             {
                 try
                 {
-                    day = DateTime.Parse(string.Join(",", _arguments)).Eristify();
+                    day = System.DateTime.Parse(string.Join(",", _arguments)).Eristify();
                     ABot.Bot.SendMessage(m_owner.Variables["$SENDER"].m_Value,
                                 day.ToString(EFormat.LONG_DATE));
                 }
-                catch (Exception _ex)
+                catch (System.Exception _ex)
                 {
                     m_owner.InvokeError("DateTime Format kaputt: " + _ex);
                     return;
@@ -36,7 +32,7 @@ namespace SimpleBot.CICommands
             }
             else
             {
-                day = DateTime.Now.Eristify();
+                day = System.DateTime.Now.Eristify();
                 ABot.Bot.SendMessage(m_owner.Variables["$SENDER"].m_Value,
                                     day.ToString(EFormat.FULL));
             }

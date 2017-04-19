@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using OpenBekomb;
 using OpenBekomb.Modules;
-using System.Text.RegularExpressions;
 using SimpleBot.Modules.Cron;
 
 namespace SimpleBot.Modules

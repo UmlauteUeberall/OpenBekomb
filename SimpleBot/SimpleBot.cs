@@ -1,5 +1,4 @@
 ﻿using OpenBekomb;
-using OpenBekomb.Modules;
 using SimpleBot.Modules;
 
 namespace SimpleBot

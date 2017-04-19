@@ -1,7 +1,4 @@
-﻿using System;
-using System.Text.RegularExpressions;
-
-namespace OpenBekomb.Commands
+﻿namespace OpenBekomb.Commands
 {
     class PrivMsgCommand : ABotCommand
     {

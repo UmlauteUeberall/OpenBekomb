@@ -1,11 +1,6 @@
-﻿using CommandInterpreter;
-using ddate;
+﻿using ddate;
 using OpenBekomb;
-using OpenBekomb.Modules;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace SimpleBot.Modules.Cron
 {
@@ -50,7 +45,7 @@ namespace SimpleBot.Modules.Cron
             }
         }
 
-        public bool IsReady(DateTime _dateTime)
+        public bool IsReady(System.DateTime _dateTime)
         {
             DDay d = _dateTime.Eristify();
 

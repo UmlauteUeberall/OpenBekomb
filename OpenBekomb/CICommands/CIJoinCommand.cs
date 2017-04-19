@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using CommandInterpreter;
+﻿using CommandInterpreter;
 
 namespace OpenBekomb.CICommands
 {

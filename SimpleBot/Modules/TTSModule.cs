@@ -1,5 +1,4 @@
-﻿using System;
-using System.Speech.Synthesis;
+﻿using System.Speech.Synthesis;
 using OpenBekomb;
 using OpenBekomb.Modules;
 using System.Threading;
@@ -9,7 +8,7 @@ namespace SimpleBot.Modules
 {
     public class TTSModule : AModule
     {
-        private Random m_rand = new Random();
+        private System.Random m_rand = new System.Random();
 
         private Thread m_ttsThread;
 
@@ -69,7 +68,7 @@ namespace SimpleBot.Modules
                         ss.Speak(currentMessage);
 
                     }
-                    catch (ArgumentNullException _ex)
+                    catch (System.ArgumentNullException _ex)
                     {
 
                     }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using CommandInterpreter;
+﻿using CommandInterpreter;
 
 namespace OpenBekomb.CICommands
 {
@@ -17,7 +13,7 @@ takes no parameters";
         {
             base.Run(_arguments);
 
-            ABot.Bot.SendRawMessage($"PING :{DateTime.Now.Ticks}");
+            ABot.Bot.SendRawMessage($"PING :{System.DateTime.Now.Ticks}");
         }
     }
 }

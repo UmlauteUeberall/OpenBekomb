@@ -1,9 +1,4 @@
-﻿using OpenBekomb.Commands;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
+﻿
 namespace OpenBekomb.Modules
 {
     public class PingModule : AModule
@@ -30,7 +25,7 @@ namespace OpenBekomb.Modules
             m_timer -= _deltaTime;
             if (m_timer <= 0)
             {
-                Owner.SendRawMessage($"PING :{DateTime.Now.Ticks}");
+                Owner.SendRawMessage($"PING :{System.DateTime.Now.Ticks}");
                 m_timer = 30;
             }
         }
