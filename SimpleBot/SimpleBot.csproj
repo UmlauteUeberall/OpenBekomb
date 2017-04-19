@@ -50,12 +50,20 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Calculator, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CommandInterpreter\REPL\bin\Debug\Calculator.dll</HintPath>
+    </Reference>
     <Reference Include="CommandInterpreter, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\CommandInterpreter\REPL\bin\Debug\CommandInterpreter.dll</HintPath>
     </Reference>
     <Reference Include="ddate">
       <HintPath>..\..\ddate\ddate\bin\Debug\ddate.dll</HintPath>
+    </Reference>
+    <Reference Include="plib_util, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\plib\bin\plib_util.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -66,6 +74,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CICommands\CICronCommand.cs" />
     <Compile Include="CICommands\CIDDateCommand.cs" />
     <Compile Include="Modules\CronModule.cs" />
     <Compile Include="Modules\Cron\CronEntry.cs" />

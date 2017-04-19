@@ -14,6 +14,7 @@ namespace OpenBekomb
         public string m_Symbol;
         public ACommand[] m_CICommands;
         public ACommand[] m_BlackListedCICommands;
+        public string[] m_StartCICommands;
 
         public static BotConfig Default { get { return s_default; } }
 

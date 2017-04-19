@@ -6,6 +6,7 @@ using OpenBekomb;
 using SimpleBot.CICommands;
 using CommandInterpreter.Commands;
 using CommandInterpreter;
+using CommandInterpreter.Calculator;
 
 namespace SimpleBot
 {
@@ -19,39 +20,32 @@ namespace SimpleBot
                                     m_Name = "simpleBot",
                                     m_FullName = "simpleBot made with openBekomb",
                                     m_StartChannels = new [] 
-                                            {
+                                    {
                                                 "#durp",
                                                 "#hurp",
                                                 "#/prog/bot"
                                     },
                                     m_Symbol = "ü",
-                                    m_CICommands = new ACommand[] { new CIDDateCommand()},
-                                    m_BlackListedCICommands = new ACommand[] { new WriteCommand(), new CommandCommand()}
-                                    });
-
-            /*
-            SpeechSynthesizer ss = new SpeechSynthesizer();
-            var hurp = ss.GetInstalledVoices();
-
-            int i = 0;
-            foreach (var durp in hurp)
-            {
-                ss.SelectVoice(durp.VoiceInfo.Name);
-                ss.Rate = -5;
-
-                try
-                {
-                    //ss.Speak("Alarm");
-                   // ss.SetOutputToWaveFile($"file{i++}.wav");
-                    ss.Speak("Bernd, stell dir vor, du schlägst jemanden so hart, dass er zu einer Tür wird. Du findest dann heraus, dass so ALLE Türen entstehen, und du wirst in einen Mörderclub involviert, der Türen macht. Je stärker man schlägt, desto besser wird die Tür. Es gibt also irgendwelche super starke Mörder die Leute in venezianische Türen und so einen Scheiß schlagen.");
-
-                }
-                catch (ArgumentNullException _ex)
-                {
-
-                }
-            }
-            */
+                                    m_CICommands = new ACommand[] 
+                                    {
+                                        new CIDDateCommand(),
+                                        new CICronCommand(),
+                                        new Calc()
+                                    },
+                                    m_BlackListedCICommands = new ACommand[] 
+                                    {
+                                        new WriteCommand(),
+                                        new CommandCommand(),
+                                        new LoadCommand(),
+                                        new LogCommand(),
+                                        new SaveVCommand(),
+                                        new LoadVCommand(),
+                                    },
+                                    m_StartCICommands = new[]
+                                    {
+                                        "cron(0h,0m,run(#/prog/bot,ddate()))"
+                                    }
+                                });
         }
     }
 }

@@ -307,12 +307,15 @@ namespace OpenBekomb
             ci.AddProgram<CIPartCommand>();
             ci.AddProgram<CIKickCommand>();
             ci.AddProgram<CIPingCommand>();
+            ci.AddProgram<CIRunCommand>();
 
             m_Config.m_CICommands?.ForEach(o => ci.AddProgram(o));
 
             m_Config.m_BlackListedCICommands?.ForEach(o => ci.RemoveProgram(o));
 
             ci.Initialize(L.Log, L.LogE);
+
+            m_Config.m_StartCICommands?.ForEach(o => ci.Run(o));
 
             string currentCMD;
 

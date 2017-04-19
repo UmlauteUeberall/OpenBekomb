@@ -77,6 +77,7 @@
     <Compile Include="CICommands\CIKickCommand.cs" />
     <Compile Include="CICommands\CIPartCommand.cs" />
     <Compile Include="CICommands\CIPingCommand.cs" />
+    <Compile Include="CICommands\CIRunCommand.cs" />
     <Compile Include="CICommands\CISendCommand.cs" />
     <Compile Include="Commands\ABotCommand.cs" />
     <Compile Include="Commands\KickCommand.cs" />
