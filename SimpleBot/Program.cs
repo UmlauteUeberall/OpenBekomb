@@ -19,7 +19,8 @@ namespace SimpleBot
                                     {
                                                 "#durp",
                                                 "#hurp",
-                                                "#/prog/bot"
+                                                "#/prog/bot",
+                                                "#hurr"
                                     },
                                     m_Symbol = "ü",
                                     m_CICommands = new ACommand[] 

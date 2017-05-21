@@ -39,6 +39,7 @@ namespace SimpleBot.Modules
                 {
                     if (ce.IsReady(d))
                     {
+
                         ce.Fire();
                     }
                 }

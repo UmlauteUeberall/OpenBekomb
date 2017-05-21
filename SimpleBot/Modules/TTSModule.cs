@@ -1,4 +1,5 @@
-﻿using System.Speech.Synthesis;
+﻿/*
+using System.Speech.Synthesis;
 using OpenBekomb;
 using OpenBekomb.Modules;
 using System.Threading;
@@ -77,3 +78,4 @@ namespace SimpleBot.Modules
         }
     }
 }
+*/

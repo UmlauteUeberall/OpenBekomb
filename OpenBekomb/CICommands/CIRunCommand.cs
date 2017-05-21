@@ -31,9 +31,18 @@ Takes two parameters";
                 message = string.Join(", ", _arguments.Skip(1).ToArray());
             }
 
-            string target = _arguments.Length == 1
-                        ? m_owner.Variables["$SENDER"].m_Value
-                        : _arguments[0];
+
+            string target;
+            if (_arguments.Length == 1)
+            {
+                target = m_owner.Variables["$SENDER"].m_Value;
+            }
+            else
+            {
+                target = _arguments[0];
+                m_owner.AddVariable("$SENDER", target, true);
+
+            }
 
             //message = m_owner.CheckVariables(message);
             CmdInterpreter ci = m_owner.Clone();

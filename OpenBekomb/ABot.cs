@@ -22,6 +22,8 @@ namespace OpenBekomb
 
         public BotConfig m_Config { get; private set; }
         public bool Started { get; private set; }
+        // false setzen um den MainThread zum Reconnect zu bringen
+        public bool IsConnected { get; private set; }
 
         public const float TARGET_FPS = 60;
         public const long MAX_MILLISEC_PER_FRAME = (long)(1 / TARGET_FPS * 1000);
@@ -42,11 +44,14 @@ namespace OpenBekomb
 
         private Queue<string> m_pendingCICommands = new Queue<string>();
         private object m_ciCommandsLock = new object();
-
+        private string m_host;
+        private int m_port;
 
         public ABot(string _host, int _port)
         {
             Bot = this;
+            m_host = _host;
+            m_port = _port;
 
             m_isRunning = true;
 
@@ -75,12 +80,12 @@ namespace OpenBekomb
             m_CIThread = new Thread(CILoop);
             m_CIThread.Start();
 
-            
+
         }
 
         public void Run(BotConfig _config = null)
         {
-            m_Config = _config ?? BotConfig.Default; 
+            m_Config = _config ?? BotConfig.Default;
             SendRawMessage($"NICK {m_Config.m_Name}");
             SendRawMessage($"USER {m_Config.m_Name} biep311.de {m_Config.m_FullName} :{m_Config.m_Name}");
             // Warten auf Ende der MOTD
@@ -97,24 +102,34 @@ namespace OpenBekomb
             Stopwatch sw = new Stopwatch();
             sw.Start();
             long time = sw.ElapsedMilliseconds;
-            try
+            while (m_isRunning)
             {
-                while (m_isRunning)
+                try
                 {
-                    Update((sw.ElapsedMilliseconds - time) / 1000.0f);
-                    time = sw.ElapsedMilliseconds;
-                    Thread.Sleep((int)(System.Math.Max(MAX_MILLISEC_PER_FRAME - sw.ElapsedMilliseconds + time, 0)));
+                    while (m_isRunning)
+                    {
+                        if (!IsConnected)
+                        {
+                            throw new System.Exception();
+                        }
+
+                        Update((sw.ElapsedMilliseconds - time) / 1000.0f);
+                        time = sw.ElapsedMilliseconds;
+                        Thread.Sleep((int)(System.Math.Max(MAX_MILLISEC_PER_FRAME - sw.ElapsedMilliseconds + time, 0)));
+                    }
+                }
+                catch (System.Exception _ex)
+                {
+                    L.LogW(_ex);
+                    Restart();
                 }
             }
-            catch (System.Exception _ex)
-            {
-                L.LogW(_ex);
-            }
-            finally
-            {
-                m_MessageThread.Abort();
-                m_MessageThread = null;
-            }
+
+            m_MessageThread.Abort();
+            m_MessageThread = null;
+            m_CIThread.Abort();
+            m_CIThread = null;
+
         }
 
         protected virtual void Update(float _deltaTime)
@@ -144,15 +159,38 @@ namespace OpenBekomb
             //    string.Join("|", 
             //                m_commands.Select(o => o.Value.Name).ToArray())
             //                })[^:]*):(.*)";
+            //              RINU!
             string pattern = @"^(?:[:](\S+) )?(\S+)(?: (?!:)(.+?))?(?: [:](.+))?$";
 
 
             // Erste Nachricht ist ein Ping das beantwortet werden muss
             message = ReceiveMessage();
-            
-            m = Regex.Match(message.Split(new[] { "\r\n" }, 
-                        StringSplitOptions.RemoveEmptyEntries)[1], pattern);
-            Com<PingCommand>().Answer(m.Groups[1].Value, m.Groups[3].Value, m.Groups[4].Value);
+
+            if (string.IsNullOrEmpty(message))
+            {
+                throw new System.ArgumentException("message is null");
+            }
+
+            while (message.EndsWith(m_Config.m_Name + " :Nickname is already in use."))
+            {
+                SendRawMessage($"NICK {m_Config.m_Name + "_"}");
+                m_Config.m_Name += "_";
+
+                message = ReceiveMessage();
+            }
+
+            try
+            {
+
+                m = Regex.Match(message.Split(new[] { "\r\n" },
+                            StringSplitOptions.RemoveEmptyEntries)[1], pattern);
+                Com<PingCommand>().Answer(m.Groups[1].Value, m.Groups[3].Value, m.Groups[4].Value);
+            }
+            catch (System.Exception _ex)
+            {
+                L.LogE(_ex);
+                return;
+            }
 
             // Warte auf das Ende der MOTD
             while (!Started)
@@ -165,6 +203,7 @@ namespace OpenBekomb
                     if (Regex.IsMatch(currentLine, @"^:\S* 376"))
                     {
                         Started = true;
+                        IsConnected = true;
                         break;
                     }
                 }
@@ -172,7 +211,7 @@ namespace OpenBekomb
 
             while (true)
             {
-                message = ReceiveMessage();            
+                message = ReceiveMessage();
                 message.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries).
                     ForEach(o => incommingMessages.Enqueue(o));
 
@@ -185,7 +224,7 @@ namespace OpenBekomb
                     mod = Com(m.Groups[2].Value);
                     if (mod != null)
                     {
-                        mod.Answer(m.Groups[1].Value, m.Groups[3].Value, m.Groups[4].Value);  
+                        mod.Answer(m.Groups[1].Value, m.Groups[3].Value, m.Groups[4].Value);
                     }
                 }
             }
@@ -218,7 +257,8 @@ namespace OpenBekomb
                 }
                 catch (SocketException _ex)
                 {
-                    ShutDown();
+                    IsConnected = false;
+                    Thread.CurrentThread.Abort();
                     return "";
                 }
             } while (length == 1024);
@@ -229,13 +269,13 @@ namespace OpenBekomb
             return message;
         }
 
-        public T Mod<T>() where T: AModule
+        public T Mod<T>() where T : AModule
         {
             if (!m_modules.ContainsKey(typeof(T)))
             {
                 return null;
             }
-            return (T) m_modules[typeof(T)];
+            return (T)m_modules[typeof(T)];
         }
 
         public AModule Mod(string _name)
@@ -287,7 +327,7 @@ namespace OpenBekomb
 
         private void ConsoleInput()
         {
-            
+
             while (true)
             {
                 string s = System.Console.ReadLine();
@@ -297,6 +337,7 @@ namespace OpenBekomb
 
         private void CILoop()
         {
+            #region -- Init --
             while (m_Config == null)
             {
                 Thread.Sleep(100);
@@ -320,20 +361,39 @@ namespace OpenBekomb
 
             m_Config.m_StartCICommands?.ForEach(o => ci.Run(o));
 
+            #endregion
+
             string currentCMD;
 
             while (true)
             {
-                lock (m_ciCommandsLock)
+                try
                 {
-                    if (m_pendingCICommands.Count == 0)
+                    while (!IsConnected)
                     {
-                        Thread.Sleep(50);
-                        continue;
+                        Thread.Sleep(100);
                     }
-                    currentCMD = m_pendingCICommands.Dequeue();
 
-                    ci.Run(currentCMD);
+                    while (IsConnected)
+                    {
+                        lock (m_ciCommandsLock)
+                        {
+                            if (m_pendingCICommands.Count == 0)
+                            {
+                                Thread.Sleep(50);
+                                continue;
+                            }
+                            currentCMD = m_pendingCICommands.Dequeue();
+
+                            ci.Run(currentCMD);
+                        }
+                    }
+                    throw new System.Exception();
+                }
+                catch (System.Exception _ex)
+                {
+                    L.LogE(_ex);
+                    IsConnected = false;
                 }
             }
         }
@@ -414,9 +474,58 @@ namespace OpenBekomb
             m_socket.Send(Encoding.UTF8.GetBytes(_text + "\r\n"));
         }
 
+        public void Restart()
+        {
+            L.LogW("Restart");
+            Started = false;
+
+            if (m_MessageThread != null)
+            {
+                m_MessageThread.Abort();
+                m_MessageThread = null;     // C Style
+            }
+
+            try
+            {
+                m_socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                m_socket.Connect(m_host, m_port);
+            }
+            catch (System.Exception _ex)
+            {
+                L.LogE(_ex);
+
+                Thread.Sleep(2300);
+                Restart();
+            }
+
+            SendRawMessage($"NICK {m_Config.m_Name}");
+            SendRawMessage($"USER {m_Config.m_Name} biep311.de {m_Config.m_FullName} :{m_Config.m_Name}");
+
+            var oldChans = m_channels;
+            m_channels = new List<Channel>();
+
+            m_MessageThread = new Thread(ProcessInput);
+            m_MessageThread.Start();
+
+            while (!IsConnected)
+            {
+                if (!m_MessageThread.IsAlive)
+                {
+                    Thread.Sleep(2300);
+                    Restart();              // Dumm weil es auf lange sicht eine Stackoverflowexception geben könnte bei fehlender Verbindung über lange Zeit
+                    m_channels = oldChans;  // Um die alten Kanäle über mehrere Neustarts zu retten, sieht derpy aus
+                    return;
+                }
+
+                Thread.Sleep(100);
+            }
+
+            oldChans.ForEach(o => Join(o.Name));
+        }
+
         public void ShutDown()
         {
-            m_isRunning = true;
+            m_isRunning = false;
         }
 
         protected virtual void CleanUp()
