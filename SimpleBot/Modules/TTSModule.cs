@@ -1,5 +1,6 @@
-﻿/*
+﻿#if !MONO
 using System.Speech.Synthesis;
+#endif
 using OpenBekomb;
 using OpenBekomb.Modules;
 using System.Threading;
@@ -17,6 +18,7 @@ namespace SimpleBot.Modules
             : base(_bot)
         {
             m_ttsThread = new Thread(DoTTs);
+            m_ttsThread.Name = "TTS-Thread";
             m_ttsThread.Start();
         }
 
@@ -41,11 +43,14 @@ namespace SimpleBot.Modules
         private Queue<string> m_ttsMessages = new Queue<string>();
         private object m_messageLock = new object();
 
+        static int s;
+
         private void DoTTs()
         {
+#if !MONO
             SpeechSynthesizer ss = new SpeechSynthesizer();
             var voices = ss.GetInstalledVoices();
-
+#endif
             
 
 
@@ -61,6 +66,7 @@ namespace SimpleBot.Modules
                     }
                     currentMessage = m_ttsMessages.Dequeue();
 
+#if !MONO
                     ss.SelectVoice(voices[m_rand.Next(voices.Count - 1)].VoiceInfo.Name);
                     ss.Rate = -5;
 
@@ -73,9 +79,13 @@ namespace SimpleBot.Modules
                     {
 
                     }
+#else
+                    //System.Diagnostics.Process.Start($"touch meinSACK{s++}");
+                    System.Diagnostics.Process.Start($"/bin/bash", $"-c \"espeak '{currentMessage}' 2> /dev/null\"");
+                    //System.Diagnostics.Process.Start($"/usr/bin/espeak", $"\"{currentMessage}\"");
+#endif
                 }
             }
         }
     }
 }
-*/

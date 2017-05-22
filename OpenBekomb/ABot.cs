@@ -74,10 +74,13 @@ namespace OpenBekomb
 
             //Threads
             m_MessageThread = new Thread(ProcessInput);
+            m_MessageThread.Name = "Message-Thread";
             m_MessageThread.Start();
             m_ConsoleInputThread = new Thread(ConsoleInput);
+            m_ConsoleInputThread.Name = "ConsoleInput-Thread";
             m_ConsoleInputThread.Start();
             m_CIThread = new Thread(CILoop);
+            m_CIThread.Name = "CI-Thread";
             m_CIThread.Start();
 
 
@@ -505,6 +508,7 @@ namespace OpenBekomb
             m_channels = new List<Channel>();
 
             m_MessageThread = new Thread(ProcessInput);
+            m_MessageThread.Name = "Message-Thread";
             m_MessageThread.Start();
 
             while (!IsConnected)

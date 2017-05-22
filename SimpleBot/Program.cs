@@ -20,7 +20,7 @@ namespace SimpleBot
                                                 "#durp",
                                                 "#hurp",
                                                 "#/prog/bot",
-                                                "#hurr"
+                                                //"#hurr"
                                     },
                                     m_Symbol = "ü",
                                     m_CICommands = new ACommand[] 
@@ -40,7 +40,8 @@ namespace SimpleBot
                                     },
                                     m_StartCICommands = new[]
                                     {
-                                        "cron(0h,0m,run(#/prog/bot,ddate()))"
+                                        "cron(0h,0m,run(#/prog/bot,ddate()))",
+                                        "cron(0h,0m,run(#hurr,ddate()))"
                                     }
                                 });
         }
