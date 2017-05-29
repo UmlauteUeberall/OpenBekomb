@@ -199,6 +199,7 @@ namespace OpenBekomb
             while (!Started)
             {
                 message = ReceiveMessage();
+                
                 message.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries).ForEach(o => incommingMessages.Enqueue(o));
                 while (incommingMessages.Count > 0)
                 {
@@ -368,6 +369,8 @@ namespace OpenBekomb
 
             string currentCMD;
 
+            bool shallWait = false;
+
             while (true)
             {
                 try
@@ -379,11 +382,17 @@ namespace OpenBekomb
 
                     while (IsConnected)
                     {
+                        if (shallWait)
+                        {
+                            Thread.Sleep(50);
+                            shallWait = false;
+                        }
+
                         lock (m_ciCommandsLock)
                         {
                             if (m_pendingCICommands.Count == 0)
                             {
-                                Thread.Sleep(50);
+                                shallWait = true;
                                 continue;
                             }
                             currentCMD = m_pendingCICommands.Dequeue();

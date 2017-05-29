@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace OpenBekomb.Modules
+﻿namespace OpenBekomb.Modules
 {
     public abstract class AModule
     {
@@ -18,7 +13,7 @@ namespace OpenBekomb.Modules
 
         public virtual void Answer(Channel _chan, User _sender, User _target, string _message)
         {
-
+            //L.Log("Start Process " + Name);
         }
 
         public AModule(ABot _bot)

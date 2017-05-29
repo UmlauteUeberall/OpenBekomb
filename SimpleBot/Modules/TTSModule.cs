@@ -5,6 +5,7 @@ using OpenBekomb;
 using OpenBekomb.Modules;
 using System.Threading;
 using System.Collections.Generic;
+using plib.Util;
 
 namespace SimpleBot.Modules
 {
@@ -51,17 +52,25 @@ namespace SimpleBot.Modules
             SpeechSynthesizer ss = new SpeechSynthesizer();
             var voices = ss.GetInstalledVoices();
 #endif
-            
 
+
+            bool shallWait = false;
 
             string currentMessage;
             while (true)
             {
+                if (shallWait)
+                {
+                    Thread.Sleep(50);
+                    shallWait = false;
+                }
+
                 lock (m_messageLock)
                 {
+
                     if (m_ttsMessages.Count == 0)
                     {
-                        Thread.Sleep(50);
+                        shallWait = true;
                         continue;
                     }
                     currentMessage = m_ttsMessages.Dequeue();
@@ -81,7 +90,7 @@ namespace SimpleBot.Modules
                     }
 #else
                     //System.Diagnostics.Process.Start($"touch meinSACK{s++}");
-                    System.Diagnostics.Process.Start($"/bin/bash", $"-c \"espeak '{currentMessage}' 2> /dev/null\"");
+                    System.Diagnostics.Process.Start($"/bin/bash", $"-c \"espeak '{currentMessage.Escape("\"\'")}' 2> /dev/null\"");
                     //System.Diagnostics.Process.Start($"/usr/bin/espeak", $"\"{currentMessage}\"");
 #endif
                 }
