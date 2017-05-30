@@ -1,6 +1,4 @@
 ﻿using CommandInterpreter;
-using System;
-using System.Collections.Generic;
 namespace OpenBekomb
 {
     public class BotConfig

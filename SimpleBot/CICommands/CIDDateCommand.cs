@@ -1,6 +1,7 @@
 ﻿using CommandInterpreter;
 using ddate;
 using OpenBekomb;
+using plib.Util;
 
 namespace SimpleBot.CICommands
 {
@@ -14,15 +15,15 @@ namespace SimpleBot.CICommands
             base.Run(_arguments);
 
 
-
             DDay day;
+            EFormat format;
             if (_arguments.Length > 0)
             {
                 try
                 {
                     day = System.DateTime.Parse(string.Join(",", _arguments)).Eristify();
-                    ABot.Bot.SendMessage(m_owner.Variables["$SENDER"].m_Value,
-                                day.ToString(EFormat.LONG_DATE));
+                    format = EFormat.LONG_DATE;
+                    
                 }
                 catch (System.Exception _ex)
                 {
@@ -33,9 +34,11 @@ namespace SimpleBot.CICommands
             else
             {
                 day = System.DateTime.Now.Eristify();
-                ABot.Bot.SendMessage(m_owner.Variables["$SENDER"].m_Value,
-                                    day.ToString(EFormat.FULL));
+                format = EFormat.FULL;
             }
+
+            string[] lines = day.ToString(format).Split('\n');
+            lines.ForEach(o => ABot.Bot.SendMessage(m_owner.Variables["$SENDER"].m_Value, o));
 
         }
     }
