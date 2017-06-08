@@ -11,9 +11,11 @@ namespace SimpleBot.Modules
 {
     public class TTSModule : AModule
     {
-        private System.Random m_rand = new System.Random();
+        private Queue<string> m_ttsMessages = new Queue<string>();
 
+        private System.Random m_rand = new System.Random();
         private Thread m_ttsThread;
+        private object m_messageLock = new object();
 
         public TTSModule(ABot _bot) 
             : base(_bot)
@@ -40,11 +42,6 @@ namespace SimpleBot.Modules
                 m_ttsMessages.Enqueue(_message);
             }
         }
-
-        private Queue<string> m_ttsMessages = new Queue<string>();
-        private object m_messageLock = new object();
-
-        static int s;
 
         private void DoTTs()
         {
@@ -89,9 +86,7 @@ namespace SimpleBot.Modules
 
                     }
 #else
-                    //System.Diagnostics.Process.Start($"touch meinSACK{s++}");
                     System.Diagnostics.Process.Start($"/bin/bash", $"-c \"espeak '{currentMessage.Escape("\"\'")}' 2> /dev/null\"");
-                    //System.Diagnostics.Process.Start($"/usr/bin/espeak", $"\"{currentMessage}\"");
 #endif
                 }
             }

@@ -24,8 +24,7 @@ namespace OpenBekomb.Commands
         {
             L.Log(_messageBody);
             DateTime d = new DateTime(long.Parse(_messageBody));
-
-            Owner.Mod<PingModule>().LastPingTime = (float) (DateTime.Now - d).TotalMilliseconds;
+            //Owner.Mod<PingModule>().LastPingTime = (float) (DateTime.Now - d).TotalMilliseconds;
         }
     }
 }

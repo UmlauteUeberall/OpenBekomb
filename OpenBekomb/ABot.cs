@@ -25,6 +25,8 @@ namespace OpenBekomb
         // false setzen um den MainThread zum Reconnect zu bringen
         public bool IsConnected { get; private set; }
 
+        public string m_Name;
+
         public const float TARGET_FPS = 60;
         public const long MAX_MILLISEC_PER_FRAME = (long)(1 / TARGET_FPS * 1000);
 
@@ -66,10 +68,12 @@ namespace OpenBekomb
             AddCommand(new PrivMsgCommand(this));
             AddCommand(new PongCommand(this));
             AddCommand(new KickCommand(this));
+            AddCommand(new RenameFailedCommand(this));
 
             //Modules
             AddModule(new PingModule(this));
             AddModule(new CIModule(this));
+            AddModule(new RenameModule(this));
 
 
             //Threads
@@ -89,8 +93,9 @@ namespace OpenBekomb
         public void Run(BotConfig _config = null)
         {
             m_Config = _config ?? BotConfig.Default;
-            SendRawMessage($"NICK {m_Config.m_Name}");
-            SendRawMessage($"USER {m_Config.m_Name} biep311.de {m_Config.m_FullName} :{m_Config.m_Name}");
+            m_Name = m_Config.m_Name;
+            SendRawMessage($"NICK {m_Name}");
+            SendRawMessage($"USER {m_Name} biep311.de {m_Config.m_FullName} :{m_Name}");
             // Warten auf Ende der MOTD
             while (!Started)
             {
@@ -151,7 +156,7 @@ namespace OpenBekomb
             string message;
             string currentLine;
             //string[] messageParts;
-            ABotCommand mod;
+            ABotCommand com;
             Match m;
             #region Alarm
             // group 1 complete header
@@ -174,10 +179,10 @@ namespace OpenBekomb
                 throw new System.ArgumentException("message is null");
             }
 
-            while (message.EndsWith(m_Config.m_Name + " :Nickname is already in use."))
+            while (message.EndsWith(m_Name + " :Nickname is already in use."))
             {
-                SendRawMessage($"NICK {m_Config.m_Name + "_"}");
-                m_Config.m_Name += "_";
+                SendRawMessage($"NICK {m_Name + "_"}");
+                m_Name += "_";
 
                 message = ReceiveMessage();
             }
@@ -225,10 +230,10 @@ namespace OpenBekomb
                     currentLine = incommingMessages.Dequeue();
                     //messageParts = currentLine.Split(' ');
                     m = Regex.Match(currentLine, pattern);
-                    mod = Com(m.Groups[2].Value);
-                    if (mod != null)
+                    com = Com(m.Groups[2].Value);
+                    if (com != null)
                     {
-                        mod.Answer(m.Groups[1].Value, m.Groups[3].Value, m.Groups[4].Value);
+                        com.Answer(m.Groups[1].Value, m.Groups[3].Value, m.Groups[4].Value);
                     }
                 }
             }
@@ -412,7 +417,7 @@ namespace OpenBekomb
 
         public bool IsAdressed(string _message)
         {
-            return _message.StartsWith($"{m_Config.m_Name}:")
+            return _message.StartsWith($"{m_Name}:")
                 || _message.StartsWith(m_Config.m_Symbol);
         }
 
@@ -510,8 +515,8 @@ namespace OpenBekomb
                 Restart();
             }
 
-            SendRawMessage($"NICK {m_Config.m_Name}");
-            SendRawMessage($"USER {m_Config.m_Name} biep311.de {m_Config.m_FullName} :{m_Config.m_Name}");
+            SendRawMessage($"NICK {m_Name}");
+            SendRawMessage($"USER {m_Name} biep311.de {m_Config.m_FullName} :{m_Name}");
 
             var oldChans = m_channels;
             m_channels = new List<Channel>();
