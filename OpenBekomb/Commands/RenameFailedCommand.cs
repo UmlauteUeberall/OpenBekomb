@@ -17,7 +17,7 @@
             {
                 string name = Owner.Mod<Modules.RenameModule>().m_OldName;
                 Owner.SendRawMessage($"NICK {name}");
-                Owner.m_Name += name;
+                Owner.m_Name = name;
             }
         }
     }
