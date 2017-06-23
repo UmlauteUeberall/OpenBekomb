@@ -228,6 +228,12 @@ namespace OpenBekomb
                 while (incommingMessages.Count > 0)
                 {
                     currentLine = incommingMessages.Dequeue();
+
+                    if (currentLine.EndsWith($"462 {m_Name}: You may not reregister"))
+                    {
+                        continue;
+                    }
+
                     //messageParts = currentLine.Split(' ');
                     m = Regex.Match(currentLine, pattern);
                     com = Com(m.Groups[2].Value);
@@ -339,8 +345,16 @@ namespace OpenBekomb
 
             while (true)
             {
-                string s = System.Console.ReadLine();
-                AddCICommand(s);
+                try
+                {
+
+                    string s = System.Console.ReadLine();
+                    AddCICommand(s);
+                }
+                catch (System.Exception _ex)
+                {
+                    L.LogE(_ex);
+                }
             }
         }
 
