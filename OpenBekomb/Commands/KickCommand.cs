@@ -23,7 +23,7 @@
             if (kickedPerson == Owner.m_Config.m_Name)
             {
                 Channel c = Owner.GetChannel(targetParts[0]);
-                Owner.Parted(c);
+                Owner.HasParted(c);
             }
         }
     }

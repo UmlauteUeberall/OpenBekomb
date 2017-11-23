@@ -18,7 +18,7 @@ Needs one parameter";
             base.Run(_arguments);
             if (_arguments.Length != 1)
             {
-                m_owner.InvokeError("you need at 1 parameter");
+                m_owner.InvokeError("you need 1 parameter");
                 return;
             }
 

@@ -30,10 +30,19 @@
             }
 
 
-            Channel c = _target.StartsWith("#") ? new Channel(_target) : null;
-            User s = new User(sender);
+            Channel c = _target.StartsWith("#") ? Owner.GetChannel(_target) : null;
+            User s = Owner.GetUser(sender);
             User t = c == null ? new User(_target) : null;
 
+            if (c != null)  // Ist eine Nachricht im Channel
+            {
+                c.LogMessage(s, _messageBody);
+            }
+            else // Direktnachricht
+            {
+                s.AddLog(_messageBody);
+            }
+            
             Owner.ProcessModulesAnswers(c, s, t, _messageBody);
 
             //if (target.StartsWith("#"))

@@ -1,5 +1,8 @@
 ﻿namespace OpenBekomb.Modules
 {
+    /// <summary>
+    /// Module werden mit einer Framerate aufgerufen in einer GameLoop
+    /// </summary>
     public abstract class AModule
     {
         public ABot Owner { get; private set; }

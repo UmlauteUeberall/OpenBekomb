@@ -1,5 +1,8 @@
 ﻿namespace OpenBekomb.Commands
 {
+    /// <summary>
+    /// Commands sind IRC-Commands auf die geantwortet werden soll
+    /// </summary>
     public abstract class ABotCommand
     {
         public ABot Owner { get; private set; }

@@ -81,7 +81,7 @@ namespace SimpleBot.Modules
                         ss.Speak(currentMessage);
 
                     }
-                    catch (System.ArgumentNullException _ex)
+                    catch (System.ArgumentNullException)
                     {
 
                     }

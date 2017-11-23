@@ -39,6 +39,7 @@ namespace OpenBekomb
         private Thread m_CIThread;
 
         protected List<Channel> m_channels = new List<Channel>();
+        protected List<User> mo_users = new List<User>();
 
 
         private Dictionary<Type, AModule> m_modules = new Dictionary<Type, AModule>();
@@ -69,6 +70,9 @@ namespace OpenBekomb
             AddCommand(new PongCommand(this));
             AddCommand(new KickCommand(this));
             AddCommand(new RenameFailedCommand(this));
+            AddCommand(new JoinCommand(this));
+            AddCommand(new NicklistRecievedCommand(this));
+            AddCommand(new PartCommand(this));
 
             //Modules
             AddModule(new PingModule(this));
@@ -270,7 +274,7 @@ namespace OpenBekomb
                     message += Encoding.UTF8.GetString(buffer);
                     System.Array.Clear(buffer, 0, buffer.Length);
                 }
-                catch (SocketException _ex)
+                catch (SocketException)
                 {
                     IsConnected = false;
                     Thread.CurrentThread.Abort();
@@ -376,11 +380,14 @@ namespace OpenBekomb
             ci.AddProgram<CIPingCommand>();
             ci.AddProgram<CIRunCommand>();
 
+            ci.AddVariable("$SENDER", "tcl");
+
             m_Config.m_CICommands?.ForEach(o => ci.AddProgram(o));
 
             m_Config.m_BlackListedCICommands?.ForEach(o => ci.RemoveProgram(o));
 
             ci.Initialize(L.Log, L.LogE);
+
 
             m_Config.m_StartCICommands?.ForEach(o => ci.Run(o));
 
@@ -440,6 +447,18 @@ namespace OpenBekomb
             return m_channels.FirstOrDefault(o => o.Name == _channelName);
         }
 
+        internal User GetUser(string _user)
+        {
+            User u = mo_users.FirstOrDefault(o => o.Name == _user);
+            if (u == null)
+            {
+                u = new User(_user);
+                mo_users.Add(u);
+            }
+
+            return u;
+        }
+
         public void Join(Channel _channel)
         {
             Join(_channel.Name);
@@ -447,13 +466,14 @@ namespace OpenBekomb
 
         public void Join(string _channelName)
         {
-            Channel c = new Channel(_channelName);
+            //Channel c = new Channel(_channelName);
 
             if (!m_channels.Any(o => o.Name == _channelName))
             {
                 SendRawMessage($"JOIN {_channelName}");
+                SendRawMessage($"NAMES {_channelName}");
 
-                m_channels.Add(c);
+                //m_channels.Add(c);
             }
         }
 
@@ -470,11 +490,19 @@ namespace OpenBekomb
                 string s = $"PART {_channelName} :{_message ?? ""}";
                 SendRawMessage(s);
 
-                Parted(c);
+                //Parted(c);
             }
         }
 
-        public void Parted(Channel _channel)
+        public void HasJoined(Channel _channel)
+        {
+            if (!m_channels.Contains(_channel))
+            {
+                m_channels.Add(_channel);
+            }
+        }
+        
+        public void HasParted(Channel _channel)
         {
             m_channels.Remove(_channel);
         }

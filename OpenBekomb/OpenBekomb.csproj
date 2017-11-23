@@ -91,6 +91,7 @@
     <Compile Include="ABot.cs" />
     <Compile Include="BotConfig.cs" />
     <Compile Include="Channel.cs" />
+    <Compile Include="CICommands\CIExcuseCommand.cs" />
     <Compile Include="CICommands\CIJoinCommand.cs" />
     <Compile Include="CICommands\CIKickCommand.cs" />
     <Compile Include="CICommands\CIPartCommand.cs" />
@@ -98,7 +99,10 @@
     <Compile Include="CICommands\CIRunCommand.cs" />
     <Compile Include="CICommands\CISendCommand.cs" />
     <Compile Include="Commands\ABotCommand.cs" />
+    <Compile Include="Commands\JoinCommand.cs" />
     <Compile Include="Commands\KickCommand.cs" />
+    <Compile Include="Commands\NicklistRecievedCommand.cs" />
+    <Compile Include="Commands\PartCommand.cs" />
     <Compile Include="Commands\PongCommand.cs" />
     <Compile Include="Commands\PrivMsgCommand.cs" />
     <Compile Include="Commands\RenameFailedCommand.cs" />

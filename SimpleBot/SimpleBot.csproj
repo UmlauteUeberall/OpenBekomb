@@ -85,7 +85,9 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Speech" />
+    <Reference Include="System.Speech">
+      <Private>False</Private>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
@@ -94,6 +96,7 @@
   <ItemGroup>
     <Compile Include="CICommands\CICronCommand.cs" />
     <Compile Include="CICommands\CIDDateCommand.cs" />
+    <Compile Include="CICommands\CIExcuseCommand.cs" />
     <Compile Include="Modules\CronModule.cs" />
     <Compile Include="Modules\Cron\CronEntry.cs" />
     <Compile Include="Modules\Cron\CronOption.cs" />
