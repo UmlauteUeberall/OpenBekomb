@@ -42,9 +42,9 @@ namespace SimpleBot
                                     },
                                     m_StartCICommands = new[]
                                     {
-                                        "cron(0h,0m,run(#/prog/bot,ddate()))",
-                                        "cron(0h,0m,run(#hurr,ddate()))",
-                                        "cron(0h,0m,run(#sitzen,ddate()))",
+                                        @"cron(0h,0m,run(#/prog/bot\,ddate()))",
+                                        @"cron(0h,0m,run(#hurr\,ddate()))",
+                                        @"cron(0h,0m,run(#sitzen\,ddate()))",
                                         //""
                                     }
                                 });

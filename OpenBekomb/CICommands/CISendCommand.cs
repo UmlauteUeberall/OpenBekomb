@@ -5,7 +5,7 @@ using plib.Util;
 namespace OpenBekomb.CICommands
 {
     [Command("send")]
-    public class CISendCommand : ACommand
+    public sealed class CISendCommand : ACommand
     {
         public CISendCommand()
         {
@@ -13,34 +13,23 @@ namespace OpenBekomb.CICommands
 
         public override string ManPage => 
 @"Sends a message to an irc user
-Takes two parameters";
-       
-        public override void Run(string[] _arguments)
+Takes one to two parameters";
+
+        [Runnable]
+        public void RunCommand(string _text)
         {
-            base.Run(_arguments);
-            if (_arguments.Length < 1)
-            {
-                m_owner.InvokeError("you need at least 1 parameter");
-                return;
-            }
-            string message;
-            if (_arguments.Length == 1)
-            {
-                message = _arguments[0];
-            }
-            else
-            {
-                message = string.Join(", ", _arguments.Skip(1).ToArray());
-            }
+            string target = m_owner.Variables["$SENDER"].m_Value;
+            RunCommand(target, _text);
+        }
 
-            string target = _arguments.Length == 1 
-                        ? m_owner.Variables["$SENDER"].m_Value 
-                        : _arguments[0];
+        [Runnable]
+        public void RunCommand(string _target, string _text)
+        {
+            _text = m_owner.CheckVariables(_text);
 
-            message = m_owner.CheckVariables(message);
+            string[] lines = _text.Split(new[] { "\r\n" }, System.StringSplitOptions.None);
+            lines.ForEach(o => ABot.Bot.SendMessage(_target, o));
 
-            string[] lines = message.Split(new[] { "\r\n" }, System.StringSplitOptions.None);
-            lines.ForEach(o => ABot.Bot.SendMessage(target, o));
         }
     }
 }

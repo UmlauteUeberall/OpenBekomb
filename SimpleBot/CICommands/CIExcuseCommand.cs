@@ -10,7 +10,7 @@ using OpenBekomb;
 namespace SimpleBot.CICommands
 {
     [Command("excuse")]
-    class CIExcuseCommand : ACommand
+    sealed class CIExcuseCommand : ACommand
     {
         public override string ManPage =>
 @"Returns a excuse
@@ -26,59 +26,55 @@ or 'add' as first parameter followed by tag and text";
             if (File.Exists("excuses.xml"))
             {
                 XDocument doc = XDocument.Load("excuses.xml");
-                var t = doc.Root.Elements().Elements().ToArray();
-
-                //string tag;
-                //foreach (var o in doc.Root.Elements())
-                //{
-                //    tag = (string) o.Attribute("tag");
-                //    mi_excuses.Add(tag, new List<string>());
-                //    foreach (var p in o.Elements())
-                //    {
-                //        mi_excuses[tag].Add((string) p);
-                //    }
-                //}
-
-
-                doc.Root.Elements().ForEach(o => mi_excuses.Add((string)o.Attribute("tag"), o.Elements().Select(p => (string) p).ToList()));
-            }
-        }
-
-        public override void Run(string[] _arguments)
-        {
-            base.Run(_arguments);
-            //if (_arguments.Length > 2)
-            //{
-            //    m_owner.InvokeError("you need zero or one parameter parameter for output and 2 parameters for input");
-            //    return;
-            //}
-
-            if (_arguments.Length > 2 && _arguments[0] == "add")
-            {
-                fi_addExcuse(_arguments[1], string.Join(", ", _arguments.Skip(2).ToArray()));
-
-                return;
-            }
-
-            string target = m_owner.Variables["$SENDER"].m_Value;
-            string message;
-            if (_arguments.Length == 0)
-            {
-                message = mi_excuses.SelectMany(o => o.Value).RandomElement();
+                doc.Root.Elements().ForEach(o => mi_excuses.Add((string)o.Attribute("tag"), o.Elements().Select(p => (string)p).ToList()));
             }
             else
             {
-                if (mi_excuses.ContainsKey(_arguments[0]))
-                {
-                    message = mi_excuses[_arguments[0]].RandomElement();
-                }
-                else
-                {
-                    message = mi_excuses.SelectMany(o => o.Value).RandomElement();
-                }
+                File.Create("excuses.xml");
             }
 
-            message.Split(new[] { "\\n" }, System.StringSplitOptions.RemoveEmptyEntries).ForEach(o => ABot.Bot.SendMessage(target, o));
+        }
+
+        [Runnable]
+        public void RunCommand(string _command, string _excuser, string _message)
+        {
+            if (_command == "add")
+            {
+
+                fi_addExcuse(_excuser, _message);
+            }
+            else
+            {
+                m_owner.InvokeError($"{_command} is not a valid command!");
+            }
+        }
+
+        [Runnable]
+        public void RunCommand()
+        {
+            RunCommand(mi_excuses.RandomElement().Key);
+        }
+
+        [Runnable]
+        public void RunCommand(string _excuser)
+        {
+            string target = m_owner.Variables["$SENDER"].m_Value;
+            string message;
+
+            if (mi_excuses.ContainsKey(_excuser))
+            {
+                message = mi_excuses[_excuser].RandomElement();
+            }
+            else
+            {
+                //message = mi_excuses.SelectMany(o => o.Value).RandomElement();
+                m_owner.InvokeError($"no excuses found for {_excuser}");
+                return;
+            }
+
+            message.Split(new[] { @"\n" }, System.StringSplitOptions.RemoveEmptyEntries)
+                .ForEach(o => ABot.Bot.SendMessage(target, o));
+            
         }
 
         private void fi_addExcuse(string _tag, string _excuse)

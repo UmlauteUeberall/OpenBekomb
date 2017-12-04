@@ -6,40 +6,27 @@ using plib.Util;
 namespace SimpleBot.CICommands
 {
     [Command("ddate")]
-    class CIDDateCommand : ACommand
+    public sealed class CIDDateCommand : ACommand
     {
         public override string ManPage => "ddates input or current Time";
 
-        public override void Run(string[] _arguments)
+        [Runnable]
+        public void RunCommand()
         {
-            base.Run(_arguments);
+            fi_ddateOutput(System.DateTime.Now.Eristify(), EFormat.FULL);
+        }
 
+        [Runnable]
+        public void RunCommand(System.DateTime _time)
+        {
+            fi_ddateOutput(_time.Eristify(), EFormat.LONG_DATE);
 
-            DDay day;
-            EFormat format;
-            if (_arguments.Length > 0)
-            {
-                try
-                {
-                    day = System.DateTime.Parse(string.Join(",", _arguments)).Eristify();
-                    format = EFormat.LONG_DATE;
-                    
-                }
-                catch (System.Exception _ex)
-                {
-                    m_owner.InvokeError("DateTime Format kaputt: " + _ex);
-                    return;
-                }
-            }
-            else
-            {
-                day = System.DateTime.Now.Eristify();
-                format = EFormat.FULL;
-            }
+        }
 
-            string[] lines = day.ToString(format).Split('\n');
+        private void fi_ddateOutput(DDay _day, EFormat _format)
+        {
+            string[] lines = _day.ToString(_format).Split('\n');
             lines.ForEach(o => ABot.Bot.SendMessage(m_owner.Variables["$SENDER"].m_Value, o));
-
         }
     }
 }

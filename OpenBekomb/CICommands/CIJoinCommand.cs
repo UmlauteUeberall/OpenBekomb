@@ -3,7 +3,7 @@
 namespace OpenBekomb.CICommands
 {
     [Command("join")]
-    public class CIJoinCommand : ACommand
+    public sealed class CIJoinCommand : ACommand
     {
         public CIJoinCommand()
         {
@@ -13,16 +13,10 @@ namespace OpenBekomb.CICommands
 @"Joins into an irc channel
 Needs one parameter";
 
-        public override void Run(string[] _arguments)
+        [Runnable]
+        public void RunCommand(string _targetChannel)
         {
-            base.Run(_arguments);
-            if (_arguments.Length != 1)
-            {
-                m_owner.InvokeError("you need 1 parameter");
-                return;
-            }
-
-            ABot.Bot.Join(_arguments[0]);
+            ABot.Bot.Join(_targetChannel);
         }
     }
 }

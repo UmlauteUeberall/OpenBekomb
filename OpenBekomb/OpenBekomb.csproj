@@ -91,7 +91,6 @@
     <Compile Include="ABot.cs" />
     <Compile Include="BotConfig.cs" />
     <Compile Include="Channel.cs" />
-    <Compile Include="CICommands\CIExcuseCommand.cs" />
     <Compile Include="CICommands\CIJoinCommand.cs" />
     <Compile Include="CICommands\CIKickCommand.cs" />
     <Compile Include="CICommands\CIPartCommand.cs" />

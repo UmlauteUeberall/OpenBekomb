@@ -7,49 +7,34 @@ namespace OpenBekomb.CICommands
     [Command("run")]
     class CIRunCommand : ACommand
     {
-        public override string ManPage => 
+        public override string ManPage =>
 @"Runs a CI-Command to a target
-Takes two parameters";
-
-        public override void Run(string[] _arguments)
+Takes one ore two parameters";
+        [Runnable]
+        public void RunCommand(string _command)
         {
-            base.Run(_arguments);
+            string target = m_owner.Variables["$SENDER"].m_Value;
 
-            if (_arguments.Length < 1)
-            {
-                m_owner.InvokeError("you need at least 1 parameter");
-                return;
-            }
-            string message;
-            if (_arguments.Length == 1)
-            {
-                message = _arguments[0];
-            }
-            else
-            {
-                message = string.Join(", ", _arguments.Skip(1).ToArray());
-            }
+            fi_runCICommand(target, _command);
+        }
 
+        [Runnable]
+        public void RunCommand(string _target, string _command)
+        {
+            m_owner.AddVariable("$SENDER", _target, true);
 
-            string target;
-            if (_arguments.Length == 1)
-            {
-                target = m_owner.Variables["$SENDER"].m_Value;
-            }
-            else
-            {
-                target = _arguments[0];
-                m_owner.AddVariable("$SENDER", target, true);
+            fi_runCICommand(_target, _command);
 
-            }
+        }
 
-            //message = m_owner.CheckVariables(message);
+        private void fi_runCICommand(string _target, string _command)
+        {
             CmdInterpreter ci = m_owner.Clone();
             ci.Initialize(System.Console.WriteLine);
-            message = ci.Run(message);
+            _command = ci.Run(_command);
 
-            string[] lines = message.Split(new[] { "\r\n" }, System.StringSplitOptions.None);
-            lines.ForEach(o => ABot.Bot.SendMessage(target, o));
+            string[] lines = _command.Split(new[] { "\r\n" }, System.StringSplitOptions.None);
+            lines.ForEach(o => ABot.Bot.SendMessage(_target, o));
         }
     }
 }

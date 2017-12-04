@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using OpenBekomb;
 using OpenBekomb.Modules;
 using SimpleBot.Modules.Cron;
+using plib.Util;
 
 namespace SimpleBot.Modules
 {
@@ -67,7 +68,7 @@ namespace SimpleBot.Modules
                 s += "\n";
                 for (int i = 0; i < m_cronJobs.Count; i++)
                 {
-                    s += i + "    " + m_cronJobs[i].ToString() + "\n";
+                    s += i + "    " + m_cronJobs[i].ToString().Unescape("\\") + "\n";
                 }
                 //m_cronJobs.Select(o => o.ToString()).Aggregate((o1, o2) => o1 + "\n" + o2);
             }

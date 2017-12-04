@@ -1,6 +1,5 @@
 ﻿using CommandInterpreter;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 using plib.Util;
 using OpenBekomb;
@@ -10,95 +9,80 @@ using SimpleBot.Modules.Cron;
 namespace SimpleBot.CICommands
 {
     [Command("cron")]
-    class CICronCommand : ACommand
+    public sealed class CICronCommand : ACommand
     {
-        public override string ManPage => 
+        public override string ManPage =>
 @"adds a cronjob
 uses discordian date";
 
-        public override void Run(string[] _arguments)
+        [Runnable]
+        public void RunCommand()
         {
-            base.Run(_arguments);
+            string info = ABot.Bot.Mod<CronModule>().GetCronInfo();
+            info.Split('\n').
+                ForEach(o => ABot.Bot.SendMessage(m_owner.Variables["$SENDER"].m_Value, o));
+        }
 
+        [Runnable]
+        public void RunCommand(int _idToDelete)
+        {
+            ABot.Bot.Mod<CronModule>().RemoveCron(_idToDelete);
+        }
+
+        [Runnable]
+        public void RunCommand(string _time1, string _command)
+        {
+            fi_AddCron(_command, _time1);
+        }
+
+        [Runnable]
+        public void RunCommand(string _time1, string _time2, string _command)
+        {
+            fi_AddCron(_command, _time1, _time2);
+        }
+
+        [Runnable]
+        public void RunCommand(string _time1, string _time2, string _time3, string _command)
+        {
+            fi_AddCron(_command, _time1, _time2, _time3);
+        }
+
+        [Runnable]
+        public void RunCommand(string _time1, string _time2, string _time3, string _time4, string _command)
+        {
+            fi_AddCron(_command, _time1, _time2, _time3, _time4);
+        }
+
+        [Runnable]
+        public void RunCommand(string _time1, string _time2, string _time3, string _time4, string _time5, string _command)
+        {
+            fi_AddCron(_command, _time1, _time2, _time3, _time4, _time5);
+        }
+
+        private void fi_AddCron(string _command, params string[] _times)
+        {
             CronModule cm = ABot.Bot.Mod<CronModule>();
 
-            if (_arguments.Length == 0)
-            {
-                string info = cm.GetCronInfo();
-                info.Split('\n').
-                    ForEach(o => ABot.Bot.SendMessage(m_owner.Variables["$SENDER"].m_Value, o));
-                return;
-            }
-
-            Regex r = new Regex("^[0-9]+$");
-            Match m;
-            if (_arguments.Length == 1 && (m = r.Match(_arguments[0])).Success)
-            {
-                cm.RemoveCron(int.Parse(m.Value));
-                return;
-            }
-
             Queue<CronOption> options = new Queue<CronOption>();
-            r = new Regex("^([0-9]+)([mhdMD])$");
-            int i = 0;
-            for (; i < _arguments.Length; i++)
+            Regex r = new Regex("^([0-9*]+)([mhdMD])$");
+            Match m;
+            _times.ForEach(o =>
             {
-                m = r.Match(_arguments[i]);
+                m = r.Match(o);
                 if (!m.Success)
                 {
-                    break;
+                    m_owner.InvokeError($"timestamp {o} is not valid, it must be formatted like \"^([0-9]+)([mhdMD])$\"");
+                    throw new ReturnException();
                 }
-                options.Enqueue(new CronOption(m.Groups[2].Value, int.Parse(m.Groups[1].Value)));
-            }
-            string command = string.Join(", ", _arguments.Skip(i).ToArray());
 
-            cm.AddCron(new CronEntry(options, command));
-        }
-
-        /*
-        public override void Answer(Channel _chan, User _sender, User _target, string _message)
-        {
-            base.Answer(_chan, _sender, _target, _message);
-
-            if (Owner.IsAdressed(_message))
-            {
-                string[] words = _message.Split(' ');
-                if (words.Length > 2 && words[1] == Name)
+                if (m.Groups[1].Value != "*")
                 {
-                    CreateCron(string.Join(" ", words.Skip(2).ToArray()));
+                    options.Enqueue(new CronOption(m.Groups[2].Value, int.Parse(m.Groups[1].Value)));
+
                 }
-            }
+            });
+
+            cm.AddCron(new CronEntry(options, _command));
         }
-
-        public void CreateCron(string _crontext)
-        {
-            Queue<string> words = new Queue<string>(_crontext.Split(' '));
-            List<CronOption> options = new List<CronOption>(5);
-            Match match;
-
-            string currentWord;
-            while (words.Count > 0)
-            {
-                currentWord = words.Dequeue();
-                match = Regex.Match(currentWord, @"^(\d+)([mhdMD])$");
-                if (!match.Success)
-                {
-                    break;
-                }
-
-                if (options.Any(o => o.Name == match.Groups[2].Value))
-                {
-                    break;
-                }
-                options.Add(new CronOption(match.Groups[2].Value, int.Parse(match.Groups[1].Value)));
-            }
-
-            if (words.Count > 0)
-            {
-                m_cronJobs.Add(new CronEntry(options, string.Join(" ", words.ToArray())));
-            }
-
-        }
-        */
     }
 }

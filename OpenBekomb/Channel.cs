@@ -27,7 +27,9 @@ namespace OpenBekomb
             {
                 Directory.CreateDirectory("logs");
             }
-            File.AppendAllText($"logs/{Name}.log", $"{System.DateTime.Now.ToString("HH:mm:ss")}\t{_user.Name}\t{_messageBody}" + System.Environment.NewLine);
+
+            string name = Name.Replace("/","_");
+            File.AppendAllText($"logs/{name}.log", $"[{System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}]\t{_user.Name}\t{_messageBody}" + System.Environment.NewLine);
         }
 
         public class LogEntry

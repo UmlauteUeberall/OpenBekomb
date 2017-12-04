@@ -1,5 +1,6 @@
 ﻿using ddate;
 using OpenBekomb;
+using plib.Util;
 using System.Collections.Generic;
 
 namespace SimpleBot.Modules.Cron
@@ -58,7 +59,7 @@ namespace SimpleBot.Modules.Cron
 
         public void Fire()
         {
-            ABot.Bot.AddCICommand(m_command);
+            ABot.Bot.AddCICommand(m_command.Unescape("\\"));
         }
 
         public override string ToString()
