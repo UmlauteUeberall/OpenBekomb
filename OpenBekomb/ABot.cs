@@ -50,7 +50,7 @@ namespace OpenBekomb
         private string m_host;
         private int m_port;
 
-        public ABot(string _host, int _port)
+        public ABot(string _host, int _port, System.Func<string> _timeFormatting = null)
         {
             Bot = this;
             m_host = _host;
@@ -59,6 +59,7 @@ namespace OpenBekomb
             m_isRunning = true;
 
             L.APP_NAME = GetType().Name;
+            L.mu_TimeFormatting = _timeFormatting ?? L.CurrentTimezoneFormatFull;
 
             // Socket
             m_socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -90,8 +91,6 @@ namespace OpenBekomb
             m_CIThread = new Thread(CILoop);
             m_CIThread.Name = "CI-Thread";
             m_CIThread.Start();
-
-
         }
 
         public void Run(BotConfig _config = null)

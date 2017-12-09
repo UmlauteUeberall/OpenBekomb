@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using plib.Util;
+using System.Collections.Generic;
 using System.IO;
 
 namespace OpenBekomb
@@ -28,7 +29,7 @@ namespace OpenBekomb
             }
 
             string name = Name.Replace("/", "_");
-            File.AppendAllText($"logs/{name}.log", $"[{System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}]\t{_message}" + System.Environment.NewLine);
+            File.AppendAllText($"logs/{name}.log", $"[{L.mu_TimeFormatting()}]\t{_message}" + System.Environment.NewLine);
         }
     }
 }
