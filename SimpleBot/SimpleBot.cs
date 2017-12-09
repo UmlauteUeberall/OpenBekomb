@@ -18,7 +18,7 @@ namespace SimpleBot
             System.DateTime now = System.DateTime.Now;
             DDay dday = now.Eristify();
 
-            return $"{dday.ToString(EFormat.SHORT_DATE)} {now.Hour:00}:{now.Minute:00}:{now.Second}:00";
+            return $"{dday.ToString(EFormat.SHORT_DATE)} {now.Hour:00}:{now.Minute:00}:{now.Second:00}";
         }
     }
 }
