@@ -13,7 +13,7 @@ namespace SimpleBot.CICommands
         [Runnable]
         public void RunCommand()
         {
-            fi_ddateOutput(System.DateTime.Now.Eristify(), EFormat.FULL);
+            fi_ddateOutput(System.DateTime.Now.Eristify(), EFormat.FULL, true);
         }
 
         [Runnable]
@@ -23,10 +23,14 @@ namespace SimpleBot.CICommands
 
         }
 
-        private void fi_ddateOutput(DDay _day, EFormat _format)
+        private void fi_ddateOutput(DDay _day, EFormat _format, bool _readTTS = false)
         {
             string[] lines = _day.ToString(_format).Split('\n');
             lines.ForEach(o => ABot.Bot.SendMessage(m_owner.Variables["$SENDER"].m_Value, o));
+            if (_readTTS)
+            {
+                lines.ForEach(ABot.Bot.Mod<Modules.TTSModule>().AddMessage);
+            }
         }
     }
 }

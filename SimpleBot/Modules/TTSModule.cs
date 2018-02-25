@@ -39,8 +39,13 @@ namespace SimpleBot.Modules
 
             lock (m_messageLock)
             {
-                m_ttsMessages.Enqueue(_message);
+                AddMessage(_message);
             }
+        }
+
+        public void AddMessage(string _message)
+        {
+            m_ttsMessages.Enqueue(_message);
         }
 
         private void DoTTs()

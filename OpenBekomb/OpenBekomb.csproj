@@ -69,7 +69,8 @@
     <Reference Include="Calculator">
       <HintPath>..\..\CommandInterpreter\REPL\bin\Debug\Calculator.dll</HintPath>
     </Reference>
-    <Reference Include="CommandInterpreter">
+    <Reference Include="CommandInterpreter, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\CommandInterpreter\REPL\bin\Debug\CommandInterpreter.dll</HintPath>
     </Reference>
     <Reference Include="plib_console, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
