@@ -10,7 +10,7 @@ using OpenBekomb;
 namespace SimpleBot.CICommands
 {
     [Command("excuse")]
-    sealed class CIExcuseCommand : ACommand
+    public sealed class CIExcuseCommand : ACommand
     {
         public override string ManPage =>
 @"Returns a excuse
@@ -30,7 +30,7 @@ or 'add' as first parameter followed by tag and text";
             }
             else
             {
-                File.Create("excuses.xml");
+                new XDocument(new XElement("root")).Save("excuses.xml");
             }
 
         }
