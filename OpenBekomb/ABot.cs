@@ -66,6 +66,7 @@ namespace OpenBekomb
 
             //Threads
             m_MessageThread = new Thread(ProcessInput);
+            m_MessageThread.Name = "Messages";
             m_MessageThread.Start();
             m_ConsoleInputThread = new Thread(ConsoleInput);
             m_ConsoleInputThread.Start();
