@@ -5,7 +5,7 @@ using plib.Util;
 namespace OpenBekomb.CICommands
 {
     [Command("send")]
-    public class CISendCommand : ACommand
+    public sealed class CISendCommand : ACommand
     {
         public CISendCommand()
         {
@@ -13,23 +13,23 @@ namespace OpenBekomb.CICommands
 
         public override string ManPage => 
 @"Sends a message to an irc user
-Takes to parameters";
-       
-        public override void Run(string[] _arguments)
+Takes one to two parameters";
+
+        [Runnable]
+        public void RunCommand(string _text)
         {
-            base.Run(_arguments);
-            if (_arguments.Length < 2)
-            {
-                m_owner.InvokeError("you need at least 2 parameters");
-                return;
-            }
+            string target = m_owner.Variables["$SENDER"].m_Value;
+            RunCommand(target, _text);
+        }
 
-            string message = string.Join(",", _arguments.Skip(1).ToArray());
+        [Runnable]
+        public void RunCommand(string _target, string _text)
+        {
+            _text = m_owner.CheckVariables(_text);
 
-            message = m_owner.CheckVariables(message);
+            string[] lines = _text.Split(new[] { "\r\n" }, System.StringSplitOptions.None);
+            lines.ForEach(o => ABot.Bot.SendMessage(_target, o));
 
-            message.Split(new[] { "\r\n" }, System.StringSplitOptions.None).
-                ForEach(o => ABot.Bot.SendMessage(_arguments[0], o));
         }
     }
 }

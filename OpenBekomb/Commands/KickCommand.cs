@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace OpenBekomb.Commands
+﻿namespace OpenBekomb.Commands
 {
     public class KickCommand : ABotCommand
     {
@@ -20,14 +15,15 @@ namespace OpenBekomb.Commands
             }
         }
 
-        public override void Answer(string _messageHead, string _messageBody)
+        public override void Answer(string _sender, string _target, string _messageBody)
         {
-            string[] headParts = _messageHead.Split(new []{ ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            string kickedPerson = headParts.Last();
+            //string[] headParts = _messageHead.Split(new []{ ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] targetParts = _target.Split(' ');
+            string kickedPerson = targetParts[1];
             if (kickedPerson == Owner.m_Config.m_Name)
             {
-                Channel c = Owner.GetChannel(headParts[headParts.Length - 2]);
-                Owner.Parted(c);
+                Channel c = Owner.GetChannel(targetParts[0]);
+                Owner.HasParted(c);
             }
         }
     }

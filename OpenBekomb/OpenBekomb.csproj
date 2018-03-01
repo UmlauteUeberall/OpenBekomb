@@ -47,15 +47,38 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'MonoDebug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\MonoDebug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'MonoDebug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\MonoDebug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Calculator">
       <HintPath>..\..\CommandInterpreter\REPL\bin\Debug\Calculator.dll</HintPath>
     </Reference>
-    <Reference Include="CommandInterpreter">
+    <Reference Include="CommandInterpreter, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\CommandInterpreter\REPL\bin\Debug\CommandInterpreter.dll</HintPath>
     </Reference>
+    <Reference Include="plib_console, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\plib\bin\plib_console.dll</HintPath>
+    </Reference>
     <Reference Include="plib_util">
-      <HintPath>..\..\plip\bin\plib_util.dll</HintPath>
+      <HintPath>..\..\plib\bin\plib_util.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -73,20 +96,23 @@
     <Compile Include="CICommands\CIKickCommand.cs" />
     <Compile Include="CICommands\CIPartCommand.cs" />
     <Compile Include="CICommands\CIPingCommand.cs" />
+    <Compile Include="CICommands\CIRunCommand.cs" />
     <Compile Include="CICommands\CISendCommand.cs" />
     <Compile Include="Commands\ABotCommand.cs" />
+    <Compile Include="Commands\JoinCommand.cs" />
     <Compile Include="Commands\KickCommand.cs" />
+    <Compile Include="Commands\NicklistRecievedCommand.cs" />
+    <Compile Include="Commands\PartCommand.cs" />
     <Compile Include="Commands\PongCommand.cs" />
     <Compile Include="Commands\PrivMsgCommand.cs" />
+    <Compile Include="Commands\RenameFailedCommand.cs" />
     <Compile Include="Modules\AModule.cs" />
     <Compile Include="Commands\PingCommand.cs" />
     <Compile Include="Modules\CIModule.cs" />
     <Compile Include="Modules\PingModule.cs" />
+    <Compile Include="Modules\RenameModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="User.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Analyzer Include="..\..\plip\bin\plib_console.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

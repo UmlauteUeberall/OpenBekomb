@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 
 namespace OpenBekomb.Modules
 {
@@ -30,7 +27,10 @@ namespace OpenBekomb.Modules
                 return;
             }
 
-            Owner.AddCICommand(string.Join(" ",words.Skip(1).ToArray()));
+            string command = $"set($SENDER,{_chan?.ToString() ?? _sender.ToString()})" +
+                string.Join(" ", words.Skip(1).ToArray());
+
+            Owner.AddCICommand(command);
         }
     }
 }

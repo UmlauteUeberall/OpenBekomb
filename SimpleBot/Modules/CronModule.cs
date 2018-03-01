@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using OpenBekomb;
 using OpenBekomb.Modules;
-using System.Text.RegularExpressions;
 using SimpleBot.Modules.Cron;
+using plib.Util;
 
 namespace SimpleBot.Modules
 {
     public class CronModule : AModule
     {
         private List<CronEntry> m_cronJobs = new List<CronEntry>();
+
+        private int m_lastMinRun = -1;
 
         public CronModule(ABot _bot) 
             : base(_bot)
@@ -29,51 +29,51 @@ namespace SimpleBot.Modules
         public override void Update(float _deltaTime)
         {
             base.Update(_deltaTime);
-        }
 
+            DateTime d = DateTime.Now;
 
-        public override void Answer(Channel _chan, User _sender, User _target, string _message)
-        {
-            base.Answer(_chan, _sender, _target, _message);
-        
-            if (Owner.IsAdressed(_message))
+            if (d.Minute != m_lastMinRun)
             {
-                string[] words = _message.Split(' ');
-                if (words.Length > 2 && words[1] == Name)
+               m_lastMinRun = d.Minute;
+
+                foreach (CronEntry ce in m_cronJobs)
                 {
-                    CreateCron(string.Join(" ", words.Skip(2).ToArray()));
+                    if (ce.IsReady(d))
+                    {
+
+                        ce.Fire();
+                    }
                 }
             }
         }
 
-        public void CreateCron(string _crontext)
+        internal void AddCron(CronEntry _cronEntry)
         {
-            Queue<string> words = new Queue<string>(_crontext.Split(' '));
-            List<CronOption> options = new List<CronOption>(5);
-            Match match;
+            m_cronJobs.Add(_cronEntry);
+        }
 
-            string currentWord;
-            while (words.Count > 0)
+        internal void RemoveCron(int _pos)
+        {
+            if (m_cronJobs.Count > _pos)
             {
-                currentWord = words.Dequeue();
-                match = Regex.Match(currentWord, @"^(\d+)([mhdMD])$");
-                if (!match.Success)
-                {
-                    break;
-                }
+                m_cronJobs.RemoveAt(_pos);
+            }
+        }
 
-                if (options.Any(o => o.Name == match.Groups[2].Value))
+        internal string GetCronInfo()
+        {
+            string s = "#    m    h    d    M    D    Command";
+            if (m_cronJobs.Count > 0)
+            {
+                s += "\n";
+                for (int i = 0; i < m_cronJobs.Count; i++)
                 {
-                    break;
+                    s += i + "    " + m_cronJobs[i].ToString().Unescape("\\") + "\n";
                 }
-                options.Add(new CronOption(match.Groups[2].Value, int.Parse(match.Groups[1].Value)));
+                //m_cronJobs.Select(o => o.ToString()).Aggregate((o1, o2) => o1 + "\n" + o2);
             }
 
-            if (words.Count > 0)
-            {
-                m_cronJobs.Add(new CronEntry(options, string.Join(" ", words.ToArray())));
-            }
-            
+            return s;
         }
     }
 }

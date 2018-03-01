@@ -1,17 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace OpenBekomb.Commands
+﻿namespace OpenBekomb.Commands
 {
+    /// <summary>
+    /// Commands sind IRC-Commands auf die geantwortet werden soll
+    /// </summary>
     public abstract class ABotCommand
     {
         public ABot Owner { get; private set; }
 
         public abstract string Name { get; }
 
-        public abstract void Answer(string _messageHead, string _messageBody);
+        public abstract void Answer(string _sender, string _target, string _messageBody);
 
         public ABotCommand(ABot _bot)
         {

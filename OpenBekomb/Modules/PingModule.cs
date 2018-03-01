@@ -1,16 +1,13 @@
-﻿using OpenBekomb.Commands;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
+﻿
 namespace OpenBekomb.Modules
 {
     public class PingModule : AModule
     {
-        private float m_timer;
+        private float m_timer = MAX_PINGTIME;
 
-        public float LastPingTime;
+        //public float LastPingTime;
+
+        public const float MAX_PINGTIME = 30;
 
         public PingModule(ABot _bot) 
             : base(_bot)
@@ -30,8 +27,8 @@ namespace OpenBekomb.Modules
             m_timer -= _deltaTime;
             if (m_timer <= 0)
             {
-                Owner.SendRawMessage($"PING :{DateTime.Now.Ticks}");
-                m_timer = 30;
+                Owner.SendRawMessage($"PING :{System.DateTime.Now.Ticks}");
+                m_timer = MAX_PINGTIME;
             }
         }
 

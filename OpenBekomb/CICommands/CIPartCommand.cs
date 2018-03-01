@@ -1,34 +1,29 @@
 ﻿using CommandInterpreter;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace OpenBekomb.CICommands
 {
     [Command("part")]
-    class CIPartCommand : ACommand
+    public sealed class CIPartCommand : ACommand
     {
         public CIPartCommand()
         {
         }
 
-        public override string ManPage => 
+        public override string ManPage =>
 @"Parts an irc channel
 Takes ";
 
-        public override void Run(string[] _arguments)
+        [Runnable]
+        public void RunCommand(string _channel)
         {
-            base.Run(_arguments);
-            if (_arguments.Length < 1)
-            {
-                m_owner.InvokeError("you need at least 1 parameter");
-                return;
-            }
+            RunCommand(_channel, null);
+        }
 
-            ABot.Bot.Part(_arguments[0], _arguments.Length > 1 
-                ? string.Join(",",_arguments.Skip(1).ToArray() ) 
-                : null);
+        [Runnable]
+        public void RunCommand(string _channel, string _reason)
+        {
+            ABot.Bot.Part(_channel, _reason);
         }
     }
 }

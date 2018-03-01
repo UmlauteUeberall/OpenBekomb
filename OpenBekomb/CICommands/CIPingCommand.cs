@@ -1,22 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using CommandInterpreter;
+﻿using CommandInterpreter;
 
 namespace OpenBekomb.CICommands
 {
-    class CIPingCommand : ACommand
+    [Command("ping")]
+    public sealed class CIPingCommand : ACommand
     {
         public override string ManPage =>
 @"Shows latency to the server
 takes no parameters";
 
-        public override void Run(string[] _arguments)
+        [Runnable]
+        public void RunCommand()
         {
-            base.Run(_arguments);
-
-            ABot.Bot.SendRawMessage($"PING :{DateTime.Now.Ticks}");
+            ABot.Bot.SendRawMessage($"PING :{System.DateTime.Now.Ticks}");
         }
     }
 }

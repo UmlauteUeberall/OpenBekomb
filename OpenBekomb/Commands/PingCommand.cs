@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace OpenBekomb.Commands
+﻿namespace OpenBekomb.Commands
 {
     public class PingCommand : ABotCommand
     {
@@ -22,7 +17,7 @@ namespace OpenBekomb.Commands
         {
         }
 
-        public override void Answer(string _messageHead, string _messageBody)
+        public override void Answer(string _sender, string _target, string _messageBody)
         {
             Owner.SendRawMessage($"PONG :{_messageBody}");
         }

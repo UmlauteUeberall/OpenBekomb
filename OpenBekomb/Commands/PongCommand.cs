@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using plib.Util;
+﻿using plib.Util;
 using OpenBekomb.Modules;
+
+using DateTime = System.DateTime;
 
 namespace OpenBekomb.Commands
 {
@@ -22,12 +20,11 @@ namespace OpenBekomb.Commands
             }
         }
 
-        public override void Answer(string _messageHead, string _messageBody)
+        public override void Answer(string _sender, string _target, string _messageBody)
         {
             L.Log(_messageBody);
             DateTime d = new DateTime(long.Parse(_messageBody));
-
-            Owner.Mod<PingModule>().LastPingTime = (float) (DateTime.Now - d).TotalMilliseconds;
+            //Owner.Mod<PingModule>().LastPingTime = (float) (DateTime.Now - d).TotalMilliseconds;
         }
     }
 }

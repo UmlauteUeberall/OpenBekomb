@@ -1,17 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using plib.Util;
 using System.Text.RegularExpressions;
+using plib.Util;
+using CommandInterpreter;
 using OpenBekomb.Commands;
 using OpenBekomb.Modules;
-using CommandInterpreter;
 using OpenBekomb.CICommands;
 
 using Stopwatch = System.Diagnostics.Stopwatch;
+using Type = System.Type;
+using StringSplitOptions = System.StringSplitOptions;
 
 namespace OpenBekomb
 {
@@ -21,6 +22,10 @@ namespace OpenBekomb
 
         public BotConfig m_Config { get; private set; }
         public bool Started { get; private set; }
+        // false setzen um den MainThread zum Reconnect zu bringen
+        public bool IsConnected { get; private set; }
+
+        public string m_Name;
 
         public const float TARGET_FPS = 60;
         public const long MAX_MILLISEC_PER_FRAME = (long)(1 / TARGET_FPS * 1000);
@@ -34,6 +39,7 @@ namespace OpenBekomb
         private Thread m_CIThread;
 
         protected List<Channel> m_channels = new List<Channel>();
+        protected List<User> mo_users = new List<User>();
 
 
         private Dictionary<Type, AModule> m_modules = new Dictionary<Type, AModule>();
@@ -41,13 +47,19 @@ namespace OpenBekomb
 
         private Queue<string> m_pendingCICommands = new Queue<string>();
         private object m_ciCommandsLock = new object();
+        private string m_host;
+        private int m_port;
 
-
-        public ABot(string _host, int _port)
+        public ABot(string _host, int _port, System.Func<string> _timeFormatting = null)
         {
             Bot = this;
+            m_host = _host;
+            m_port = _port;
 
             m_isRunning = true;
+
+            L.APP_NAME = GetType().Name;
+            L.mu_TimeFormatting = _timeFormatting ?? L.CurrentTimezoneFormatFull;
 
             // Socket
             m_socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -58,29 +70,35 @@ namespace OpenBekomb
             AddCommand(new PrivMsgCommand(this));
             AddCommand(new PongCommand(this));
             AddCommand(new KickCommand(this));
+            AddCommand(new RenameFailedCommand(this));
+            AddCommand(new JoinCommand(this));
+            AddCommand(new NicklistRecievedCommand(this));
+            AddCommand(new PartCommand(this));
 
             //Modules
             AddModule(new PingModule(this));
             AddModule(new CIModule(this));
+            AddModule(new RenameModule(this));
 
 
             //Threads
             m_MessageThread = new Thread(ProcessInput);
-            m_MessageThread.Name = "Messages";
+            m_MessageThread.Name = "Message-Thread";
             m_MessageThread.Start();
             m_ConsoleInputThread = new Thread(ConsoleInput);
+            m_ConsoleInputThread.Name = "ConsoleInput-Thread";
             m_ConsoleInputThread.Start();
             m_CIThread = new Thread(CILoop);
+            m_CIThread.Name = "CI-Thread";
             m_CIThread.Start();
-
-            
         }
 
         public void Run(BotConfig _config = null)
         {
-            m_Config = _config ?? BotConfig.Default; 
-            SendRawMessage($"NICK {m_Config.m_Name}");
-            SendRawMessage($"USER {m_Config.m_Name} biep311.de {m_Config.m_FullName} :{m_Config.m_Name}");
+            m_Config = _config ?? BotConfig.Default;
+            m_Name = m_Config.m_Name;
+            SendRawMessage($"NICK {m_Name}");
+            SendRawMessage($"USER {m_Name} biep311.de {m_Config.m_FullName} :{m_Name}");
             // Warten auf Ende der MOTD
             while (!Started)
             {
@@ -95,24 +113,34 @@ namespace OpenBekomb
             Stopwatch sw = new Stopwatch();
             sw.Start();
             long time = sw.ElapsedMilliseconds;
-            try
+            while (m_isRunning)
             {
-                while (m_isRunning)
+                try
                 {
-                    Update((sw.ElapsedMilliseconds - time) / 1000.0f);
-                    time = sw.ElapsedMilliseconds;
-                    Thread.Sleep((int)(Math.Max(MAX_MILLISEC_PER_FRAME - sw.ElapsedMilliseconds + time, 0)));
+                    while (m_isRunning)
+                    {
+                        if (!IsConnected)
+                        {
+                            throw new System.Exception();
+                        }
+
+                        Update((sw.ElapsedMilliseconds - time) / 1000.0f);
+                        time = sw.ElapsedMilliseconds;
+                        Thread.Sleep((int)(System.Math.Max(MAX_MILLISEC_PER_FRAME - sw.ElapsedMilliseconds + time, 0)));
+                    }
+                }
+                catch (System.Exception _ex)
+                {
+                    L.LogW(_ex);
+                    Restart();
                 }
             }
-            catch (Exception _ex)
-            {
-                L.LogW(_ex);
-            }
-            finally
-            {
-                m_MessageThread.Abort();
-                m_MessageThread = null;
-            }
+
+            m_MessageThread.Abort();
+            m_MessageThread = null;
+            m_CIThread.Abort();
+            m_CIThread = null;
+
         }
 
         protected virtual void Update(float _deltaTime)
@@ -131,31 +159,55 @@ namespace OpenBekomb
             string message;
             string currentLine;
             //string[] messageParts;
-            ABotCommand mod;
+            ABotCommand com;
             Match m;
             #region Alarm
             // group 1 complete header
             // group 2 command name
             // group 3 body
             #endregion
-            string pattern = $@"^(:?[^:]*({
-                string.Join("|", 
-                            m_commands.Select(o => o.Value.Name).ToArray())
-                            })[^:]*):(.*)";
+            //string pattern = $@"^(:?[^:]*({
+            //    string.Join("|", 
+            //                m_commands.Select(o => o.Value.Name).ToArray())
+            //                })[^:]*):(.*)";
+            //              RINU!
+            string pattern = @"^(?:[:](\S+) )?(\S+)(?: (?!:)(.+?))?(?: [:](.+))?$";
 
 
             // Erste Nachricht ist ein Ping das beantwortet werden muss
             message = ReceiveMessage();
-            
-            m = Regex.Match(message.Split(new[] { "\r\n" }, 
-                        StringSplitOptions.RemoveEmptyEntries)[1], pattern);
-            Com<PingCommand>().Answer(m.Groups[1].Value, m.Groups[3].Value);
+
+            if (string.IsNullOrEmpty(message))
+            {
+                throw new System.ArgumentException("message is null");
+            }
+
+            while (message.EndsWith(m_Name + " :Nickname is already in use."))
+            {
+                SendRawMessage($"NICK {m_Name + "_"}");
+                m_Name += "_";
+
+                message = ReceiveMessage();
+            }
+
+            try
+            {
+
+                m = Regex.Match(message.Split(new[] { "\r\n" },
+                            StringSplitOptions.RemoveEmptyEntries)[1], pattern);
+                Com<PingCommand>().Answer(m.Groups[1].Value, m.Groups[3].Value, m.Groups[4].Value);
+            }
+            catch (System.Exception _ex)
+            {
+                L.LogE(_ex);
+                return;
+            }
 
             // Warte auf das Ende der MOTD
             while (!Started)
             {
                 message = ReceiveMessage();
-                message = message.Replace("\0", "");
+                
                 message.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries).ForEach(o => incommingMessages.Enqueue(o));
                 while (incommingMessages.Count > 0)
                 {
@@ -163,6 +215,7 @@ namespace OpenBekomb
                     if (Regex.IsMatch(currentLine, @"^:\S* 376"))
                     {
                         Started = true;
+                        IsConnected = true;
                         break;
                     }
                 }
@@ -171,7 +224,6 @@ namespace OpenBekomb
             while (true)
             {
                 message = ReceiveMessage();
-                message = message.Replace("\0", "");
                 message.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries).
                     ForEach(o => incommingMessages.Enqueue(o));
 
@@ -179,12 +231,18 @@ namespace OpenBekomb
                 while (incommingMessages.Count > 0)
                 {
                     currentLine = incommingMessages.Dequeue();
+
+                    if (currentLine.EndsWith($"462 {m_Name}: You may not reregister"))
+                    {
+                        continue;
+                    }
+
                     //messageParts = currentLine.Split(' ');
                     m = Regex.Match(currentLine, pattern);
-                    mod = Com(m.Groups[2].Value);
-                    if (mod != null)
+                    com = Com(m.Groups[2].Value);
+                    if (com != null)
                     {
-                        mod.Answer(m.Groups[1].Value, m.Groups[3].Value);  
+                        com.Answer(m.Groups[1].Value, m.Groups[3].Value, m.Groups[4].Value);
                     }
                 }
             }
@@ -213,26 +271,29 @@ namespace OpenBekomb
                         throw new SocketException();
                     }
                     message += Encoding.UTF8.GetString(buffer);
-                    Array.Clear(buffer, 0, buffer.Length);
+                    System.Array.Clear(buffer, 0, buffer.Length);
                 }
-                catch (SocketException _ex)
+                catch (SocketException)
                 {
-                    ShutDown();
+                    IsConnected = false;
+                    Thread.CurrentThread.Abort();
                     return "";
                 }
             } while (length == 1024);
+            message = message.Replace("\0", "");
+            message = message.Trim();
             L.Log(message);
 
             return message;
         }
 
-        public T Mod<T>() where T: AModule
+        public T Mod<T>() where T : AModule
         {
             if (!m_modules.ContainsKey(typeof(T)))
             {
                 return null;
             }
-            return (T) m_modules[typeof(T)];
+            return (T)m_modules[typeof(T)];
         }
 
         public AModule Mod(string _name)
@@ -284,16 +345,30 @@ namespace OpenBekomb
 
         private void ConsoleInput()
         {
-            
+
             while (true)
             {
-                string s = Console.ReadLine();
-                AddCICommand(s);
+                try
+                {
+
+                    string s = System.Console.ReadLine();
+                    AddCICommand(s);
+                }
+                catch (System.Exception _ex)
+                {
+                    L.LogE(_ex);
+                }
             }
         }
 
         private void CILoop()
         {
+            #region -- Init --
+            while (m_Config == null)
+            {
+                Thread.Sleep(100);
+            }
+
             CmdInterpreter ci = new CmdInterpreter();
             ci.LoadCoreUtils();
             ci.AddProgram<CommandInterpreter.Calculator.Calc>();
@@ -302,35 +377,85 @@ namespace OpenBekomb
             ci.AddProgram<CIPartCommand>();
             ci.AddProgram<CIKickCommand>();
             ci.AddProgram<CIPingCommand>();
+            ci.AddProgram<CIRunCommand>();
+
+            ci.AddVariable("$SENDER", "tcl");
+
+            m_Config.m_CICommands?.ForEach(o => ci.AddProgram(o));
+
+            m_Config.m_BlackListedCICommands?.ForEach(o => ci.RemoveProgram(o));
+
             ci.Initialize(L.Log, L.LogE);
+
+
+            m_Config.m_StartCICommands?.ForEach(o => ci.Run(o));
+
+            #endregion
 
             string currentCMD;
 
+            bool shallWait = false;
+
             while (true)
             {
-                lock (m_ciCommandsLock)
+                try
                 {
-                    if (m_pendingCICommands.Count == 0)
+                    while (!IsConnected)
                     {
-                        Thread.Sleep(50);
-                        continue;
+                        Thread.Sleep(100);
                     }
-                    currentCMD = m_pendingCICommands.Dequeue();
 
-                    ci.Run(currentCMD);
+                    while (IsConnected)
+                    {
+                        if (shallWait)
+                        {
+                            Thread.Sleep(50);
+                            shallWait = false;
+                        }
+
+                        lock (m_ciCommandsLock)
+                        {
+                            if (m_pendingCICommands.Count == 0)
+                            {
+                                shallWait = true;
+                                continue;
+                            }
+                            currentCMD = m_pendingCICommands.Dequeue();
+
+                            ci.Run(currentCMD);
+                        }
+                    }
+                    throw new System.Exception();
+                }
+                catch (System.Exception _ex)
+                {
+                    L.LogE(_ex);
+                    IsConnected = false;
                 }
             }
         }
 
         public bool IsAdressed(string _message)
         {
-            return _message.StartsWith($"{m_Config.m_Name}:")
+            return _message.StartsWith($"{m_Name}:")
                 || _message.StartsWith(m_Config.m_Symbol);
         }
 
         internal Channel GetChannel(string _channelName)
         {
             return m_channels.FirstOrDefault(o => o.Name == _channelName);
+        }
+
+        internal User GetUser(string _user)
+        {
+            User u = mo_users.FirstOrDefault(o => o.Name == _user);
+            if (u == null)
+            {
+                u = new User(_user);
+                mo_users.Add(u);
+            }
+
+            return u;
         }
 
         public void Join(Channel _channel)
@@ -340,13 +465,14 @@ namespace OpenBekomb
 
         public void Join(string _channelName)
         {
-            Channel c = new Channel(_channelName);
+            //Channel c = new Channel(_channelName);
 
             if (!m_channels.Any(o => o.Name == _channelName))
             {
                 SendRawMessage($"JOIN {_channelName}");
+                SendRawMessage($"NAMES {_channelName}");
 
-                m_channels.Add(c);
+                //m_channels.Add(c);
             }
         }
 
@@ -363,11 +489,19 @@ namespace OpenBekomb
                 string s = $"PART {_channelName} :{_message ?? ""}";
                 SendRawMessage(s);
 
-                Parted(c);
+                //Parted(c);
             }
         }
 
-        public void Parted(Channel _channel)
+        public void HasJoined(Channel _channel)
+        {
+            if (!m_channels.Contains(_channel))
+            {
+                m_channels.Add(_channel);
+            }
+        }
+        
+        public void HasParted(Channel _channel)
         {
             m_channels.Remove(_channel);
         }
@@ -398,9 +532,59 @@ namespace OpenBekomb
             m_socket.Send(Encoding.UTF8.GetBytes(_text + "\r\n"));
         }
 
+        public void Restart()
+        {
+            L.LogW("Restart");
+            Started = false;
+
+            if (m_MessageThread != null)
+            {
+                m_MessageThread.Abort();
+                m_MessageThread = null;     // C Style
+            }
+
+            try
+            {
+                m_socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                m_socket.Connect(m_host, m_port);
+            }
+            catch (System.Exception _ex)
+            {
+                L.LogE(_ex);
+
+                Thread.Sleep(2300);
+                Restart();
+            }
+
+            SendRawMessage($"NICK {m_Name}");
+            SendRawMessage($"USER {m_Name} biep311.de {m_Config.m_FullName} :{m_Name}");
+
+            var oldChans = m_channels;
+            m_channels = new List<Channel>();
+
+            m_MessageThread = new Thread(ProcessInput);
+            m_MessageThread.Name = "Message-Thread";
+            m_MessageThread.Start();
+
+            while (!IsConnected)
+            {
+                if (!m_MessageThread.IsAlive)
+                {
+                    Thread.Sleep(2300);
+                    Restart();              // Dumm weil es auf lange sicht eine Stackoverflowexception geben könnte bei fehlender Verbindung über lange Zeit
+                    m_channels = oldChans;  // Um die alten Kanäle über mehrere Neustarts zu retten, sieht derpy aus
+                    return;
+                }
+
+                Thread.Sleep(100);
+            }
+
+            oldChans.ForEach(o => Join(o.Name));
+        }
+
         public void ShutDown()
         {
-            m_isRunning = true;
+            m_isRunning = false;
         }
 
         protected virtual void CleanUp()
