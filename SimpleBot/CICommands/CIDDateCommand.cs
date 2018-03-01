@@ -29,7 +29,7 @@ namespace SimpleBot.CICommands
             lines.ForEach(o => ABot.Bot.SendMessage(m_owner.Variables["$SENDER"].m_Value, o));
             if (_readTTS)
             {
-                lines.ForEach(ABot.Bot.Mod<Modules.TTSModule>().AddMessage);
+                lines.ForEach(o => ABot.Bot.Mod<Modules.TTSModule>().AddMessage(o, Modules.TTSModule.ETTSLanguage.ENGLISH));
             }
         }
     }

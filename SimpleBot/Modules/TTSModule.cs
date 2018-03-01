@@ -6,18 +6,25 @@ using OpenBekomb.Modules;
 using System.Threading;
 using System.Collections.Generic;
 using plib.Util;
+using plib.Util.Helper;
 
 namespace SimpleBot.Modules
 {
     public class TTSModule : AModule
     {
-        private Queue<string> m_ttsMessages = new Queue<string>();
+        public enum ETTSLanguage
+        {
+            ENGLISH,
+            DEUTSCH
+        }
+
+        private Queue<Tuple<ETTSLanguage, string>> m_ttsMessages = new Queue<Tuple<ETTSLanguage, string>>();
 
         private System.Random m_rand = new System.Random();
         private Thread m_ttsThread;
         private object m_messageLock = new object();
 
-        public TTSModule(ABot _bot) 
+        public TTSModule(ABot _bot)
             : base(_bot)
         {
             m_ttsThread = new Thread(DoTTs);
@@ -43,9 +50,9 @@ namespace SimpleBot.Modules
             }
         }
 
-        public void AddMessage(string _message)
+        public void AddMessage(string _message, ETTSLanguage _language = ETTSLanguage.ENGLISH)
         {
-            m_ttsMessages.Enqueue(_message);
+            m_ttsMessages.Enqueue(new Tuple<ETTSLanguage, string>(_language, _message));
         }
 
         private void DoTTs()
@@ -58,7 +65,7 @@ namespace SimpleBot.Modules
 
             bool shallWait = false;
 
-            string currentMessage;
+            Tuple<ETTSLanguage, string> currentMessage;
             while (true)
             {
                 if (shallWait)
@@ -81,9 +88,10 @@ namespace SimpleBot.Modules
                     ss.SelectVoice(voices[m_rand.Next(voices.Count - 1)].VoiceInfo.Name);
                     ss.Rate = -5;
 
+
                     try
                     {
-                        ss.Speak(currentMessage);
+                        ss.Speak(currentMessage.M1);
 
                     }
                     catch (System.ArgumentNullException)
@@ -91,7 +99,14 @@ namespace SimpleBot.Modules
 
                     }
 #else
-                    System.Diagnostics.Process.Start($"/bin/bash", $"-c \"espeak '{currentMessage.Escape("\"\'")}' 2> /dev/null\"");
+                    if (currentMessage.M0 == ETTSLanguage.ENGLISH)
+                    {
+                        System.Diagnostics.Process.Start($"/bin/bash", $"-c \"espeak '{currentMessage.M1.Replace("'", "").Replace("\"", "")}' 2> /dev/null\"");
+                    }
+                    else if (currentMessage.M0 == ETTSLanguage.DEUTSCH)
+                    {
+                        System.Diagnostics.Process.Start($"/bin/bash", $"-c \"espeak -s 105 -p 100 -v de '{currentMessage.M1.Replace("'", "").Replace("\"", "")}' 2> /dev/null\"");
+                    }
 #endif
                 }
             }
