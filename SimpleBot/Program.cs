@@ -29,7 +29,9 @@ namespace SimpleBot
                                     {
                                         new CIDDateCommand(),
                                         new CICronCommand(),
-                                        new CIExcuseCommand()
+                                        new CIExcuseCommand(),
+                                        new CTTSListenersCommand(),
+                                        new CSplitYearsCommand()
                                     },
                                     m_BlackListedCICommands = new ACommand[] 
                                     {

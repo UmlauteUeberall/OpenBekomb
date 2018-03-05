@@ -79,9 +79,8 @@
     <Reference Include="ddate">
       <HintPath>..\..\ddate\ddate\bin\Debug\ddate.dll</HintPath>
     </Reference>
-    <Reference Include="plib_util, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\plip\bin\plib_util.dll</HintPath>
+    <Reference Include="plib_util">
+      <HintPath>..\..\plib\bin\plib_util.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -97,6 +96,8 @@
     <Compile Include="CICommands\CICronCommand.cs" />
     <Compile Include="CICommands\CIDDateCommand.cs" />
     <Compile Include="CICommands\CIExcuseCommand.cs" />
+    <Compile Include="CICommands\CSplitYearsCommand.cs" />
+    <Compile Include="CICommands\CTTSListenersCommand.cs" />
     <Compile Include="Modules\CronModule.cs" />
     <Compile Include="Modules\Cron\CronEntry.cs" />
     <Compile Include="Modules\Cron\CronOption.cs" />

@@ -73,9 +73,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\CommandInterpreter\REPL\bin\Debug\CommandInterpreter.dll</HintPath>
     </Reference>
-    <Reference Include="plib_util, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\plip\bin\plib_util.dll</HintPath>
+    <Reference Include="plib_util">
+      <HintPath>..\..\plib\bin\plib_util.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
