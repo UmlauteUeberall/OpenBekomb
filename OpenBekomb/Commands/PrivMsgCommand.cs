@@ -1,4 +1,6 @@
-﻿namespace OpenBekomb.Commands
+﻿using plib.Util;
+
+namespace OpenBekomb.Commands
 {
     class PrivMsgCommand : ABotCommand
     {
@@ -23,6 +25,8 @@
             //Match m = Regex.Match(headParts[0], pattern);
             string sender = _sender.Split('!')[0];//m.Groups[1].Value.Trim();
             //string target = headParts[1].Trim();
+
+            L.Log(_sender + ":" + _target + ":" + _messageBody);
 
             if (sender == _target)
             {

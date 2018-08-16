@@ -1,4 +1,5 @@
-﻿using System;
+﻿using plib.Util;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,6 +17,7 @@ namespace OpenBekomb.Commands
 
         public override void Answer(string _sender, string _target, string _messageBody)
         {
+            L.Log("joined " + _messageBody);
             string sender = _sender.Split('!')[0];
 
             if (sender == Owner.m_Name)

@@ -282,7 +282,7 @@ namespace OpenBekomb
             } while (length == 1024);
             message = message.Replace("\0", "");
             message = message.Trim();
-            L.Log(message);
+            L.LogD(message);
 
             return message;
         }

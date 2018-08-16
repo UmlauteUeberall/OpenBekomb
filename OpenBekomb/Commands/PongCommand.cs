@@ -22,7 +22,7 @@ namespace OpenBekomb.Commands
 
         public override void Answer(string _sender, string _target, string _messageBody)
         {
-            L.Log(_messageBody);
+            L.LogD(_messageBody);
             DateTime d = new DateTime(long.Parse(_messageBody));
             //Owner.Mod<PingModule>().LastPingTime = (float) (DateTime.Now - d).TotalMilliseconds;
         }
