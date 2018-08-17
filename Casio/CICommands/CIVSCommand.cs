@@ -8,7 +8,7 @@ using System.Text;
 namespace Casio.CICommands
 {
     [Command("vs")]
-    public sealed class CVSCommand : ACommand
+    public sealed class CIVSCommand : ACommand
     {
         public override string ManPage => "";
 
@@ -16,6 +16,11 @@ namespace Casio.CICommands
         public void RunCommand(string _word1, string _word2)
         {
             CKCThread[] threads = CKohlchanParser.Parse();
+            if (threads == null)
+            {
+                ABot.Bot.SendMessage(m_owner.Variables["$SENDER"].m_Value, $"kohlchan is down");
+                return;
+            }
             int count1 = CKohlchanParser.FindCountInThreads(threads, _word1);
             int count2 = CKohlchanParser.FindCountInThreads(threads, _word2);
 

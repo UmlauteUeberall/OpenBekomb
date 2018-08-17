@@ -26,8 +26,8 @@ namespace Casio
                 m_Symbol = "ü",
                 m_CICommands = new ACommand[]
                                     {
-                                        new CVSCommand(),
-                                        new CSearchCommand()
+                                        new CIVSCommand(),
+                                        new CISearchCommand()
                                     },
                 m_BlackListedCICommands = new ACommand[]
                                     {

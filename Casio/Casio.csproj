@@ -52,8 +52,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Casio.cs" />
-    <Compile Include="CICommands\CVSCommand.cs" />
-    <Compile Include="CICommands\CSearchCommand.cs" />
+    <Compile Include="CICommands\CIVSCommand.cs" />
+    <Compile Include="CICommands\CISearchCommand.cs" />
     <Compile Include="CKCThread.cs" />
     <Compile Include="CKohlchanParser.cs" />
     <Compile Include="Program.cs" />

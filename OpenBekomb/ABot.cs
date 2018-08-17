@@ -105,9 +105,12 @@ namespace OpenBekomb
                 Thread.Sleep(100);
             }
 
-            foreach (string cs in m_Config.m_StartChannels)
+            if (m_Config.m_StartChannels != null)
             {
-                Join(cs);
+                foreach (string cs in m_Config.m_StartChannels)
+                {
+                    Join(cs);
+                }
             }
 
             Stopwatch sw = new Stopwatch();
@@ -207,7 +210,7 @@ namespace OpenBekomb
             while (!Started)
             {
                 message = ReceiveMessage();
-                
+
                 message.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries).ForEach(o => incommingMessages.Enqueue(o));
                 while (incommingMessages.Count > 0)
                 {
@@ -500,7 +503,7 @@ namespace OpenBekomb
                 m_channels.Add(_channel);
             }
         }
-        
+
         public void HasParted(Channel _channel)
         {
             m_channels.Remove(_channel);
@@ -524,12 +527,42 @@ namespace OpenBekomb
 
         public void SendMessage(string _user, string _message)
         {
-            SendRawMessage($"PRIVMSG {_user} :{_message}");
+            SendRawMessage($"PRIVMSG {_user} :", _message);
         }
 
         public void SendRawMessage(string _text)
         {
             m_socket.Send(Encoding.UTF8.GetBytes(_text + "\r\n"));
+        }
+
+        public void SendRawMessage(string _header, string _text)
+        {
+            byte[] header = Encoding.UTF8.GetBytes(_header);
+            byte[] ending = Encoding.UTF8.GetBytes("\r\n");
+            byte[] text = Encoding.UTF8.GetBytes(_text);
+            byte[] tmp = new byte[506];
+            string s;
+
+            System.Array.Copy(header, tmp, header.Length);
+            System.Array.Copy(ending, 0, tmp, tmp.Length - ending.Length, ending.Length);
+
+            int offset = 0;
+            int step = 512 - header.Length - ending.Length - 6;
+            while (text.Length - (offset + step) > 0)
+            {
+                System.Array.Copy(text, offset, tmp, header.Length, step);
+                offset += step;
+                m_socket.Send(tmp);
+                s = Encoding.UTF8.GetString(tmp);
+            }
+
+            int length = text.Length - offset;
+            tmp = new byte[header.Length + length + ending.Length];
+            System.Array.Copy(header, tmp, header.Length);
+            System.Array.Copy(text, offset, tmp, header.Length, length);
+            System.Array.Copy(ending, 0, tmp, header.Length + length, ending.Length);
+            m_socket.Send(tmp);
+            s = Encoding.UTF8.GetString(tmp);
         }
 
         public void Restart()
