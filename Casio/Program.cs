@@ -19,11 +19,11 @@ namespace Casio
             {
                 m_Name = "casio",
                 m_FullName = "casio made with openBekomb",
-                m_StartChannels = new[]
+                m_StartChannels = new string[]
                                     {
-                                                "#kohlchan"
+                                                //"#kohlchan"
                                     },
-                m_Symbol = "ü",
+                m_Symbol = "c",
                 m_CICommands = new ACommand[]
                                     {
                                         new CIVSCommand(),

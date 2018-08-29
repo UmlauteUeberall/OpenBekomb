@@ -9,18 +9,39 @@ namespace Casio
 {
     public static class CKohlchanParser
     {
-        public static CKCThread[] Parse()
+        public static CKCThread[] Parse(string _board)
         {
             try
             {
                 System.Net.WebClient wc = new System.Net.WebClient();
-                JObject[] pages = Enumerable.Range(0, 15).Select(o => JObject.Parse(wc.DownloadString($"https://kohlchan.net/b/{o}.json"))).ToArray();
-                return pages.SelectMany(o => o["threads"].Select(p => new CKCThread(wc, (int)p["posts"][0]["no"], "b"))).ToArray();
+                List<JObject> pages = fi_GetPages(wc, _board);
+                return pages.SelectMany(o => o["threads"].Select(p => new CKCThread(wc, (int)p["posts"][0]["no"], _board))).ToArray();
             }
             catch
             {
                 return null;
             }
+        }
+
+        private static List<JObject> fi_GetPages(System.Net.WebClient _wc, string _board)
+        {
+            int counter = 0;
+            List<JObject> toReturn = new List<JObject>();
+
+            try
+            {
+                while (true)
+                {
+                    toReturn.Add(JObject.Parse(_wc.DownloadString($"https://kohlchan.net/{_board}/{counter}.json")));
+                    counter++;
+                }
+            }
+            catch
+            {
+                
+            }
+
+            return toReturn;
         }
 
         public static CKCThread[] FindWordInThreads(CKCThread[] _threads, string _word)

@@ -11,6 +11,11 @@ namespace Casio
         public string[] mu_posts;
         public int mu_id;
         public string mu_board;
+
+        public static string[] mu_validBoards = {"b", "pol", "int", "a", "alt", "bus", "c", "co", "d", "danisch", "e", "f", "fb", 
+                                                /*"fefe",*/
+                                                "fit", "foto", "g", /*"jp",*/ "l", "mali", "med", "mu", "n", "ng", "ph", "prog",
+                                                "s", "soz", "trv", "tv", "v", "we", "x", "kohl", "km", "m", "keller", "ernst" };
         
 
         public CKCThread(System.Net.WebClient _wc,int _id, string _board)

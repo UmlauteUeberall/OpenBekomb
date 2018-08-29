@@ -67,14 +67,14 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Calculator">
-      <HintPath>..\..\CommandInterpreter\REPL\bin\Debug\Calculator.dll</HintPath>
+      <HintPath>..\..\..\dlls\Calculator.dll</HintPath>
     </Reference>
     <Reference Include="CommandInterpreter, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\CommandInterpreter\REPL\bin\Debug\CommandInterpreter.dll</HintPath>
+      <HintPath>..\..\..\dlls\CommandInterpreter.dll</HintPath>
     </Reference>
     <Reference Include="plib_util">
-      <HintPath>..\..\plib\bin\plib_util.dll</HintPath>
+      <HintPath>..\..\..\dlls\plib_util.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
