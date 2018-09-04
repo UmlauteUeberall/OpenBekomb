@@ -1,23 +1,20 @@
 ﻿using CommandInterpreter;
 using OpenBekomb;
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Casio.CICommands
 {
-    [Command("search")]
-    public sealed class CISearchCommand : ACommand
+    [Command("file")]
+    class CIFileCommand : ACommand
     {
         public override string ManPage => $@"NAME
-    search - searches for a text in posts and imagenames/descriptions on kohlchan
+    file - searches for a text imagenames/descriptions on kohlchan
 SYNTAX
     {mi_entryPointsText}
 EXAMPLES";
-        //if(true,calc(1+1))
-        //>2
-        //if(false,calc(1+1))
-        //<no output>
-        //if(false,calc(1+1),calc(1-1))
-        //>0";
 
         [Runnable("searches for this pattern on a board, first part is the board", EEntryPointType.FALLBACK)]
         public void RunCommand(string[] _args = null)
@@ -39,7 +36,7 @@ EXAMPLES";
                 m_owner.InvokeError($"kohlchan is down");
                 return;
             }
-            CKCThread[] found = CKohlchanParser.FindWordInThreads(threads, search).Concat(CKohlchanParser.FindFileInThreads(threads, search)).ToArray();
+            CKCThread[] found = CKohlchanParser.FindFileInThreads(threads, search);
             string text = string.Join(" ", found.Select(o => $"https://kohlchan.net/{o.mu_board}/res/{o.mu_id}.html").ToArray());
 
             ABot.Bot.SendMessage(m_owner.Variables["$SENDER"].m_Value, $"{search} found in: {text}");

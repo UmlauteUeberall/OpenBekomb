@@ -8,7 +8,7 @@ namespace Casio
 {
     public class CKCThread
     {
-        public string[] mu_posts;
+        public CKCPost[] mu_posts;
         public int mu_id;
         public string mu_board;
 
@@ -25,9 +25,32 @@ namespace Casio
 
 
             JObject thread = JObject.Parse(_wc.DownloadString($"https://kohlchan.net/{mu_board}/res/{mu_id}.json"));
-            mu_posts = thread["posts"].Select(p => (string)p["com"]).Where(o => o != null).ToArray();
+            mu_posts = thread["posts"].Select(p => new CKCPost(p)).ToArray();
         }
+    }
 
-       
+    public class CKCPost
+    {
+        public int mu_id;
+        public string mu_post;
+        public string[] mu_files;
+        
+
+        public CKCPost(JToken _token)
+        {
+            mu_id = (int) _token["no"];
+            mu_post = (string) _token["com"];
+            if (_token["filename"] != null)
+            {
+                int count = 1 + (_token["extra_files"]?.Children().Count() ?? 0);
+                mu_files = new string[count];
+
+                mu_files[0] = (string) _token["filename"] +(string)_token["ext"];
+                for(int i = 1; i < count; i++)
+                {
+                    mu_files[i] = (string)_token["extra_files"][i - 1]["filename"] + (string)_token["extra_files"][i - 1]["ext"];
+                }
+            }
+        }
     }
 }

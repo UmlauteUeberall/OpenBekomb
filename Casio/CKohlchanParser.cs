@@ -17,7 +17,7 @@ namespace Casio
                 List<JObject> pages = fi_GetPages(wc, _board);
                 return pages.SelectMany(o => o["threads"].Select(p => new CKCThread(wc, (int)p["posts"][0]["no"], _board))).ToArray();
             }
-            catch
+            catch (Exception _ex)
             {
                 return null;
             }
@@ -47,13 +47,19 @@ namespace Casio
         public static CKCThread[] FindWordInThreads(CKCThread[] _threads, string _word)
         {
             Regex r = new Regex(_word, RegexOptions.IgnoreCase);
-            return _threads.Where(o => o.mu_posts.LastOrDefault(p => r.IsMatch(p)) != null).ToArray();
+            return _threads.Where(o => o.mu_posts.LastOrDefault(p => p.mu_post != null && r.IsMatch(p.mu_post)) != null).ToArray();
+        }
+
+        public static CKCThread[] FindFileInThreads(CKCThread[] _threads, string _word)
+        {
+            Regex r = new Regex(_word, RegexOptions.IgnoreCase);
+            return _threads.Where(o => o.mu_posts.Where(p => p.mu_files != null).SelectMany(p => p.mu_files).LastOrDefault(p => r.IsMatch(p)) != null).ToArray();
         }
 
         public static int FindCountInThreads(CKCThread[] _threads, string _word)
         {
             Regex r = new Regex(_word, RegexOptions.IgnoreCase);
-            return _threads.Sum((o) => o.mu_posts.Count(p => p != null && r.IsMatch(p)));
+            return _threads.Sum((o) => o.mu_posts.Count(p => p != null && p.mu_post != null && r.IsMatch(p.mu_post)));
         }
     }
 }

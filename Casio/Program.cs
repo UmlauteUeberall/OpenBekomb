@@ -27,7 +27,9 @@ namespace Casio
                 m_CICommands = new ACommand[]
                                     {
                                         new CIVSCommand(),
-                                        new CISearchCommand()
+                                        new CISearchCommand(),
+                                        new CIFileCommand(),
+                                        new CITextCommand()
                                     },
                 m_BlackListedCICommands = new ACommand[]
                                     {
